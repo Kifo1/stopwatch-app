@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
+  const [stopwatchMsg, setStopwatchMsg] = useState("");
   const [name, setName] = useState("");
 
   async function greet() {
@@ -10,23 +11,30 @@ function App() {
     setGreetMsg(await invoke("greet", { name }));
   }
 
+  async function stopwatch() {
+    setStopwatchMsg(await invoke("stopwatch"));
+  }
+
   return (
-    <main className="container">
+    <main>
       <form
-        className="row bg-red-900"
+        className=""
         onSubmit={(e) => {
           e.preventDefault();
           greet();
+          stopwatch();
         }}
       >
         <input
-          id="greet-input"
           onChange={(e) => setName(e.currentTarget.value)}
           placeholder="Enter a name..."
         />
-        <button type="submit">Greet</button>
+        <button className="hover:cursor-pointer" type="submit">
+          Greet
+        </button>
       </form>
       <p>{greetMsg}</p>
+      <p>{stopwatchMsg}</p>
     </main>
   );
 }
