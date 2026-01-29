@@ -5,15 +5,19 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn stopwatch() -> String {
-    format!("Your stopwatch is not running.")
+fn start_stopwatch() -> bool {
+    true
+}
+#[tauri::command]
+fn stop_stopwatch() -> bool {
+    false
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, stopwatch])
+        .invoke_handler(tauri::generate_handler![greet, start_stopwatch, stop_stopwatch])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
