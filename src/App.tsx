@@ -1,38 +1,40 @@
 import { useEffect, useState } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 
 function App() {
-  const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(false);
+  const [millis, setMillis] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
 
-  async function stopStopwatch() {
-    setRunning(await invoke("stop_timer"));
+  async function start() {
+    await invoke("start_timer");
+    setIsRunning(true);
   }
 
-  async function startStopwatch() {
-    setRunning(await invoke("start_timer"));
+  async function stop() {
+    await invoke("stop_timer");
+    setIsRunning(false);
   }
 
   useEffect(() => {
-    let interval: number;
-    if (running) {
-      interval = setInterval(async () => {
-        const elapsed: number = await invoke("get_elapsed_seconds");
-        setSeconds(elapsed);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [running]);
+    const unlisten = listen<number>("timer-tick", (event) => {
+      setMillis(event.payload);
+    });
+
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, []);
 
   return (
     <main className="flex flex-col gap-5">
-      <button className="hover:cursor-pointer" onClick={startStopwatch}>
+      <button className="hover:cursor-pointer" onClick={start}>
         Start stopwatch
       </button>
-      <button className="hover:cursor-pointer" onClick={stopStopwatch}>
+      <button className="hover:cursor-pointer" onClick={stop}>
         Stop stopwatch
       </button>
-      <p>{running ? seconds : "Stopwatch paused"}</p>
+      <p>{isRunning ? (millis / 1000).toFixed(1) : "Stopwatch paused"}</p>
     </main>
   );
 }
