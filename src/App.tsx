@@ -32,7 +32,7 @@ function App() {
     <main className="flex flex-col h-full gap-5 bg-blue-">
       <div className="h-100 flex justify-center">
         <div className="flex flex-col justify-center text-center">
-          <span className="text-white font-extrabold text-6xl tracking-tight">
+          <span className="text-white font-extrabold text-6xl tracking-tight tabular-nums">
             {formatMillis(millis)}
           </span>
           <span className="text-gray-500 font-semibold text-lg uppercase">
