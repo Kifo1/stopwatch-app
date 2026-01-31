@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../lib/utils.js";
+import { cn } from "../../lib/utils.js";
 import type { ButtonHTMLAttributes } from "react";
 
 const buttonVariants = cva("hover:cursor-pointer rounded", {
@@ -7,13 +7,15 @@ const buttonVariants = cva("hover:cursor-pointer rounded", {
     variant: {
       primary:
         "text-white bg-blue-500 hover:bg-blue-600 rounded-full font-bold text-xl tracking-wide transition-all transform hover:scale-101 active:scale-100 flex items-center justify-center gap-3",
-      secondary: "",
+      secondary:
+        "text-white bg-slate-900 rounded-full font-semibold tracking-whide transition-all flex justify-center gap-3",
       danger: "",
       success: "",
-      ghost: "",
+      ghost:
+        "text-gray-400 font-semibold rounded-full hover:text-white transition-all flex justify-center gap-3",
     },
     scale: {
-      sm: "",
+      sm: "pt-1.5 pb-1.5 pl-4 pr-4",
       md: "pt-2 pb-2 pl-4 pr-4",
       lg: "",
     },
