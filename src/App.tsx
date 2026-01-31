@@ -18,6 +18,11 @@ function App() {
     setIsRunning(false);
   }
 
+  async function reset() {
+    await invoke("reset_timer");
+    setMillis(0);
+  }
+
   useEffect(() => {
     const unlisten = listen<number>("timer-tick", (event) => {
       setMillis(event.payload);
@@ -70,7 +75,7 @@ function App() {
         <Button onClick={isRunning ? stop : start}>
           {isRunning ? "Stop" : "Start"} timer
         </Button>
-        <Button>Reset</Button>
+        <Button onClick={reset}>Reset</Button>
       </div>
     </main>
   );

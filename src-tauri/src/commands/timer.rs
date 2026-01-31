@@ -58,3 +58,24 @@ pub fn stop_timer(state: tauri::State<'_, TimerState>) {
     let mut elapsed_millis = state.elapsed_millis.lock().unwrap();
     *elapsed_millis = state.start_instant.lock().unwrap().elapsed().as_millis() as u64;
 }
+
+#[tauri::command]
+pub async fn reset_timer(app: AppHandle, state: tauri::State<'_, TimerState>) -> Result<(), String> {
+    let was_running = {
+        let is_running = state.is_running.lock().map_err(|_| "Mutex Error")?;
+        *is_running
+    };
+
+    stop_timer(state.clone());
+
+    {
+        let mut elapsed_millis = state.elapsed_millis.lock().map_err(|_| "Mutex Error")?;
+        *elapsed_millis = 0;
+    }
+
+    if was_running {
+        start_timer(app, state).await
+    } else {
+        Ok(())
+    }
+}
