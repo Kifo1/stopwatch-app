@@ -5,7 +5,8 @@ import { formatMillis } from "../lib/utils.js";
 import Button from "../components/ui/Button.js";
 
 export default function Timer() {
-  const [millis, setMillis] = useState(0);
+  const [stopwatchMillis, setStopwatchMillis] = useState(0);
+  const [pomodoroMillis, setPomodoroMillis] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
   const [pomodoroPhase, setPomodoroPhase] = useState(0);
@@ -22,24 +23,26 @@ export default function Timer() {
 
   async function reset() {
     await invoke("reset_timer");
-    setMillis(0);
+    mode === "stopwatch" ? setStopwatchMillis(0) : setPomodoroMillis(0);
   }
 
   async function switchMode(newMode: "stopwatch" | "pomodoro") {
-    stop();
+    await stop();
     setMode(newMode);
-    await invoke("switch_timer_mode", { timer_mode: newMode });
+    await invoke("switch_timer_mode", { timerMode: newMode });
   }
 
   useEffect(() => {
     const unlisten = listen<number>("timer-tick", (event) => {
-      setMillis(event.payload);
+      mode === "stopwatch"
+        ? setStopwatchMillis(event.payload)
+        : setPomodoroMillis(event.payload);
     });
 
     return () => {
       unlisten.then((f) => f());
     };
-  }, []);
+  }, [mode]);
 
   return (
     <div className="flex flex-col h-full gap-5 items-center">
@@ -62,7 +65,9 @@ export default function Timer() {
       <div className="h-100 w-100 grid grid-rows-[2fr_1fr]">
         <div className="flex flex-col mt-auto mb-10 justify-center text-center">
           <span className="text-white font-mono text-6xl font-bold tabular-nums">
-            {formatMillis(millis)}
+            {formatMillis(
+              mode === "stopwatch" ? stopwatchMillis : pomodoroMillis,
+            )}
           </span>
           <span className="text-gray-500 font-semibold text-lg uppercase">
             {mode}

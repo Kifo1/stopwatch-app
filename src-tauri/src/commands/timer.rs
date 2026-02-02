@@ -144,7 +144,6 @@ fn stop_timer_inner(state: &mut TimerState) {
 
     state.is_running = false;
 
-    
     match state.active_mode {
         ActiveMode::Stopwatch => {
             state.stopwatch.elapsed_millis = state.stopwatch.start_instant.unwrap().elapsed().as_millis() as u64;
