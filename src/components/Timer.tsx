@@ -27,9 +27,8 @@ export default function Timer() {
 
   async function switchMode(newMode: "stopwatch" | "pomodoro") {
     stop();
-    reset();
     setMode(newMode);
-    setPomodoroPhase(0);
+    await invoke("switch_timer_mode", { timer_mode: newMode });
   }
 
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function Timer() {
       </div>
       <div className="h-100 w-100 grid grid-rows-[2fr_1fr]">
         <div className="flex flex-col mt-auto mb-10 justify-center text-center">
-          <span className="text-white font-extrabold text-6xl tracking-tight tabular-nums">
+          <span className="text-white font-mono text-6xl font-bold tabular-nums">
             {formatMillis(millis)}
           </span>
           <span className="text-gray-500 font-semibold text-lg uppercase">
@@ -114,7 +113,7 @@ export default function Timer() {
             className="text-slate-700 dark:text-surface-highlight"
           />
           <circle
-            className="text-blue-500 dark:text-primary transition-all duration-700 ease-in-out shadow-glow"
+            className="text-blue-500 dark:text-primary transition-all duration-700 ease-in-out"
             cx="50%"
             cy="50%"
             fill="transparent"
