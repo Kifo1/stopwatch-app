@@ -14,9 +14,10 @@ pub struct StopwatchState {
 }
 
 pub enum PomodoroPhase {
-    Focus,
-    ShortBreak,
-    LongBreak,
+    FocusOne = 0,
+    ShortBreak = 1,
+    FocusTwo = 2,
+    LongBreak = 3,
 }
 
 pub struct PomodoroState {
@@ -28,6 +29,17 @@ pub struct PomodoroState {
     pub long_break_minutes: u32,
 
     pub phase: PomodoroPhase,
+}
+
+impl PomodoroState {
+    pub fn current_phase_millis_left(&self) -> u64 {
+        let phase_millis = match self.phase {
+            PomodoroPhase::FocusOne | PomodoroPhase::FocusTwo => self.focus_minutes as u64 * 60 * 1000,
+            PomodoroPhase::ShortBreak => self.short_break_minutes as u64 * 60 * 1000,
+            PomodoroPhase::LongBreak => self.long_break_minutes as u64 * 60 * 1000,
+        };
+        phase_millis - self.elapsed_millis
+    }
 }
 
 pub struct TimerState {
@@ -55,7 +67,7 @@ impl TimerState {
                 focus_minutes: 25,
                 short_break_minutes: 5,
                 long_break_minutes: 10,
-                phase: PomodoroPhase::Focus,
+                phase: PomodoroPhase::FocusOne,
             },
         }
     }
@@ -117,7 +129,8 @@ pub async fn start_timer(app: AppHandle, state: tauri::State<'_, SharedTimerStat
                         if let Some(start) = pomodoro.start_instant {
                             pomodoro.elapsed_millis = start.elapsed().as_millis() as u64;
                         }
-                        pomodoro.elapsed_millis
+                        pomodoro.current_phase_millis_left()
+                        //TODO Check for phase switch
                     }
                 }
             };

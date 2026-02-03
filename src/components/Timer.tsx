@@ -6,10 +6,10 @@ import Button from "../components/ui/Button.js";
 
 export default function Timer() {
   const [stopwatchMillis, setStopwatchMillis] = useState(0);
-  const [pomodoroMillis, setPomodoroMillis] = useState(0);
+  const [pomodoroMillis, setPomodoroMillis] = useState(25 * 60 * 1000);
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
-  const [pomodoroPhase, setPomodoroPhase] = useState(0);
+  const [pomodoroPhase] = useState(0);
 
   async function start() {
     await invoke("start_timer");
@@ -23,7 +23,9 @@ export default function Timer() {
 
   async function reset() {
     await invoke("reset_timer");
-    mode === "stopwatch" ? setStopwatchMillis(0) : setPomodoroMillis(0);
+    mode === "stopwatch"
+      ? setStopwatchMillis(0)
+      : setPomodoroMillis(25 * 60 * 1000);
   }
 
   async function switchMode(newMode: "stopwatch" | "pomodoro") {
