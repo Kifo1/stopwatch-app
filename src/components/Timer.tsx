@@ -150,16 +150,7 @@ export default function Timer() {
             className="text-blue-500 dark:text-primary transition-all duration-700 ease-in-out"
             cx="50%"
             cy="50%"
-            transform={
-              mode === "pomodoro"
-                ? (() => {
-                    const ratio =
-                      pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
-                    console.log(ratio);
-                    return `rotate(${-90 + (1 - ratio) * 180} 50 50)`;
-                  })()
-                : "rotate(-90 50 50)"
-            }
+            transform={"rotate(-90 50 50)"}
             fill="transparent"
             r="45"
             stroke="currentColor"
@@ -176,9 +167,12 @@ export default function Timer() {
                     return `${visible} ${gap}`;
                   })()
             }
-            strokeDashoffset={
-              mode === "stopwatch" ? (isRunning ? "0" : "70") : "0"
-            }
+            strokeDashoffset={(() => {
+              if (mode === "stopwatch") return isRunning ? "0" : "70";
+              const ratio = pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
+              const offset = CIRC * (1 - ratio);
+              return `${offset}`;
+            })()}
           ></circle>
         </svg>
       </div>
