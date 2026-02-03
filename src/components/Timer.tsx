@@ -155,9 +155,10 @@ export default function Timer() {
                 ? (() => {
                     const ratio =
                       pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
+                    console.log(ratio);
                     return `rotate(${-90 + (1 - ratio) * 180} 50 50)`;
                   })()
-                : undefined
+                : "rotate(-90 50 50)"
             }
             fill="transparent"
             r="45"
@@ -171,7 +172,8 @@ export default function Timer() {
                     const ratio =
                       pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
                     const visible = CIRC * ratio;
-                    return `${visible}`;
+                    const gap = Math.max(0, CIRC - visible);
+                    return `${visible} ${gap}`;
                   })()
             }
             strokeDashoffset={
