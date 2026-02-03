@@ -13,6 +13,7 @@ pub struct StopwatchState {
     pub start_instant: Option<Instant>,
 }
 
+#[derive(Debug, Copy, Clone)]
 pub enum PomodoroPhase {
     FocusOne = 0,
     ShortBreak = 1,
@@ -38,7 +39,18 @@ impl PomodoroState {
             PomodoroPhase::ShortBreak => self.short_break_minutes as u64 * 60 * 1000,
             PomodoroPhase::LongBreak => self.long_break_minutes as u64 * 60 * 1000,
         };
-        phase_millis - self.elapsed_millis
+        phase_millis.saturating_sub(self.elapsed_millis)
+    }
+
+    pub fn start_next_phase(&mut self) {
+        self.elapsed_millis = 0;
+        self.start_instant = Some(Instant::now());
+        match self.phase {
+            PomodoroPhase::FocusOne => self.phase = PomodoroPhase::ShortBreak,
+            PomodoroPhase::ShortBreak => self.phase = PomodoroPhase::FocusTwo,
+            PomodoroPhase::FocusTwo => self.phase = PomodoroPhase::LongBreak,
+            PomodoroPhase::LongBreak => self.phase = PomodoroPhase::FocusOne,
+        }
     }
 }
 
@@ -129,8 +141,15 @@ pub async fn start_timer(app: AppHandle, state: tauri::State<'_, SharedTimerStat
                         if let Some(start) = pomodoro.start_instant {
                             pomodoro.elapsed_millis = start.elapsed().as_millis() as u64;
                         }
-                        pomodoro.current_phase_millis_left()
-                        //TODO Check for phase switch
+                        let millis_left = pomodoro.current_phase_millis_left();
+
+                        if millis_left == 0 {
+                            pomodoro.start_next_phase();
+                            let _ = app.emit("pomodoro-phase", pomodoro.phase as u8);
+                            pomodoro.current_phase_millis_left()
+                        } else {
+                            millis_left
+                        }
                     }
                 }
             };
@@ -177,7 +196,11 @@ pub async fn reset_timer(app: AppHandle, state: tauri::State<'_, SharedTimerStat
 
         match state_guard.active_mode {
             ActiveMode::Stopwatch => state_guard.stopwatch.elapsed_millis = 0,
-            ActiveMode::Pomodoro => state_guard.pomodoro.elapsed_millis = 0,
+            ActiveMode::Pomodoro => {
+                state_guard.pomodoro.elapsed_millis = 0;
+                state_guard.pomodoro.phase = PomodoroPhase::FocusOne;
+                let _ = app.emit("pomodoro-phase", state_guard.pomodoro.phase as u8);
+            },
         }
 
         was_running

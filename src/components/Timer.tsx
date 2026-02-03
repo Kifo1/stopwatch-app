@@ -9,7 +9,7 @@ export default function Timer() {
   const [pomodoroMillis, setPomodoroMillis] = useState(25 * 60 * 1000);
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
-  const [pomodoroPhase] = useState(0);
+  const [pomodoroPhase, setPomodoroPhase] = useState(0);
 
   async function start() {
     await invoke("start_timer");
@@ -35,14 +35,20 @@ export default function Timer() {
   }
 
   useEffect(() => {
-    const unlisten = listen<number>("timer-tick", (event) => {
+    const listenTimerTick = listen<number>("timer-tick", (event) => {
       mode === "stopwatch"
         ? setStopwatchMillis(event.payload)
         : setPomodoroMillis(event.payload);
     });
+    const listenPomodoroPhase = listen<number>("pomodoro-phase", (event) => {
+      setPomodoroPhase(event.payload);
+    });
 
     return () => {
-      unlisten.then((f) => f());
+      Promise.all([listenTimerTick, listenPomodoroPhase]).then(([u1, u2]) => {
+        u1();
+        u2();
+      });
     };
   }, [mode]);
 
@@ -101,7 +107,11 @@ export default function Timer() {
                 </li>
               </ul>
               <span className="text-gray-500 font-semibold text-sm uppercase">
-                Focus
+                {pomodoroPhase === 0 || pomodoroPhase === 2
+                  ? "Focus"
+                  : pomodoroPhase === 1
+                    ? "Short Break"
+                    : "Long Break"}
               </span>
             </div>
           </>
