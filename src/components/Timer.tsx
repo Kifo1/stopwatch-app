@@ -11,6 +11,23 @@ export default function Timer() {
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
   const [pomodoroPhase, setPomodoroPhase] = useState(0);
 
+  const R = 45;
+  const CIRC = 2 * Math.PI * R;
+
+  function getMaxMillisByPhase(phase: number) {
+    switch (phase) {
+      case 0:
+      case 2:
+        return 25 * 60 * 1000;
+      case 1:
+        return 5 * 60 * 1000;
+      case 3:
+        return 10 * 60 * 1000;
+      default:
+        return 25 * 60 * 1000;
+    }
+  }
+
   async function start() {
     await invoke("start_timer");
     setIsRunning(true);
@@ -130,16 +147,40 @@ export default function Timer() {
             className="text-slate-700 dark:text-surface-highlight"
           />
           <circle
-            className="text-blue-500 dark:text-primary transition-all duration-700 ease-in-out"
+            className="text-blue-500 dark:text-primary"
             cx="50%"
             cy="50%"
+            transform={
+              mode === "pomodoro"
+                ? (() => {
+                    const ratio =
+                      pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
+                    return `rotate(${-90 + (1 - ratio) * 180} 50 50)`;
+                  })()
+                : undefined
+            }
             fill="transparent"
             r="45"
             stroke="currentColor"
-            stroke-dasharray="71 70 71 70"
-            stroke-dashoffset={isRunning ? "0" : "70"}
             stroke-linecap="round"
             stroke-width="2.25"
+            style={{
+              transition:
+                "stroke-dasharray duration-700 linear, stroke-dashoffset duration-700 linear",
+            }}
+            strokeDasharray={
+              mode === "stopwatch"
+                ? "71 70 71 70"
+                : (() => {
+                    const ratio =
+                      pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
+                    const visible = CIRC * ratio;
+                    return `${visible}`;
+                  })()
+            }
+            strokeDashoffset={
+              mode === "stopwatch" ? (isRunning ? "0" : "70") : "0"
+            }
           ></circle>
         </svg>
       </div>
