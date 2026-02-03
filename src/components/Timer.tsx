@@ -147,7 +147,7 @@ export default function Timer() {
             className="text-slate-700 dark:text-surface-highlight"
           />
           <circle
-            className="text-blue-500 dark:text-primary"
+            className="text-blue-500 dark:text-primary transition-all duration-700 ease-in-out"
             cx="50%"
             cy="50%"
             transform={
@@ -164,10 +164,6 @@ export default function Timer() {
             stroke="currentColor"
             stroke-linecap="round"
             stroke-width="2.25"
-            style={{
-              transition:
-                "stroke-dasharray duration-700 linear, stroke-dashoffset duration-700 linear",
-            }}
             strokeDasharray={
               mode === "stopwatch"
                 ? "71 70 71 70"
