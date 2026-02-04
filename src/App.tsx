@@ -1,9 +1,9 @@
-import Timer from "./components/Timer";
+import TimerPage from "./features/timer/TimerPage";
 
 function App() {
   return (
     <>
-      <Timer></Timer>
+      <TimerPage></TimerPage>
     </>
   );
 }

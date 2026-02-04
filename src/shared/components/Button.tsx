@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils.js";
+import { cn } from "../lib/utils.js";
 import type { ButtonHTMLAttributes } from "react";
 
 const buttonVariants = cva("hover:cursor-pointer rounded", {
