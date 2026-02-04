@@ -170,8 +170,10 @@ export default function Timer() {
             strokeDashoffset={(() => {
               if (mode === "stopwatch") return isRunning ? "0" : "70";
               const ratio = pomodoroMillis / getMaxMillisByPhase(pomodoroPhase);
-              const offset = CIRC * (1 - ratio);
-              return `${offset}`;
+              const visible = CIRC * ratio;
+              const gap = Math.max(0, CIRC - visible);
+              const offset = gap / 2;
+              return `${-offset}`;
             })()}
           ></circle>
         </svg>
