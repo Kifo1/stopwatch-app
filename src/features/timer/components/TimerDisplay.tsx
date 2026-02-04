@@ -1,4 +1,4 @@
-import { formatMillis } from "../../../shared/lib/utils";
+import { formatMillis } from "@shared/lib/utils";
 import { PomodoroPhases } from "./PomodoroPhases";
 
 interface Props {
