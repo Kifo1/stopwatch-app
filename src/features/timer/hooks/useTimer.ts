@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
+import phaseChangeSound from "@assets/pomodoro-phase-change.mp3";
 
 export function useTimer() {
   const [stopwtachMillis, setStopwatchMillis] = useState(0);
@@ -8,6 +9,7 @@ export function useTimer() {
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
   const [pomodoroPhase, setPomodoroPhase] = useState(0);
+  const phaseChangeAudio = new Audio(phaseChangeSound);
 
   const start = async () => {
     await invoke("start_timer");
@@ -29,7 +31,6 @@ export function useTimer() {
   const switchMode = async (newMode: "stopwatch" | "pomodoro") => {
     await stop();
     setMode(newMode);
-    console.log("New Mode: " + newMode);
     await invoke("switch_timer_mode", { timerMode: newMode });
   };
 
@@ -42,10 +43,14 @@ export function useTimer() {
     const unlistenPhase = listen<number>("pomodoro-phase", (event) => {
       setPomodoroPhase(event.payload);
     });
+    const unlistenPhaseSound = listen("pomodoro-phase-sound", () => {
+      phaseChangeAudio.play();
+    });
 
     return () => {
       unlistenTick.then((f) => f());
       unlistenPhase.then((f) => f());
+      unlistenPhaseSound.then((f) => f());
     };
   }, [mode]);
 

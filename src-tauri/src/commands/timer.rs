@@ -13,7 +13,7 @@ pub struct StopwatchState {
     pub start_instant: Option<Instant>,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PomodoroPhase {
     FocusOne = 0,
     ShortBreak = 1,
@@ -146,6 +146,7 @@ pub async fn start_timer(app: AppHandle, state: tauri::State<'_, SharedTimerStat
                         if millis_left == 0 {
                             pomodoro.start_next_phase();
                             let _ = app.emit("pomodoro-phase", pomodoro.phase as u8);
+                            let _ = app.emit("pomodoro-phase-sound", ());
                             pomodoro.current_phase_millis_left()
                         } else {
                             millis_left
