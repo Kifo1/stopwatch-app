@@ -226,3 +226,17 @@ pub fn switch_timer_mode(timer_mode: String, state: tauri::State<'_, SharedTimer
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn get_current_time_millis(state: tauri::State<'_, SharedTimerState>) -> u64 {
+    let state = state.lock().unwrap();
+    match state.active_mode {
+        ActiveMode::Stopwatch => state.stopwatch.elapsed_millis,
+        ActiveMode::Pomodoro => state.pomodoro.current_phase_millis_left(),
+    }
+}
+
+#[tauri::command]
+pub fn is_timer_running(state: tauri::State<'_, SharedTimerState>) -> bool {
+    state.lock().unwrap().is_running
+}

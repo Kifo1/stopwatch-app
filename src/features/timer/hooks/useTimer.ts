@@ -54,6 +54,20 @@ export function useTimer() {
     };
   }, [mode]);
 
+  useEffect(() => {
+    const syncWithBackend = async () => {
+      const backendTime: number = await invoke("get_current_time_millis");
+      const backendIsRunning: boolean = await invoke("is_timer_running");
+
+      setIsRunning(backendIsRunning);
+      mode === "stopwatch"
+        ? setStopwatchMillis(backendTime)
+        : setPomodoroMillis(backendTime);
+    };
+
+    syncWithBackend();
+  }, []);
+
   return {
     stopwtachMillis,
     pomodoroMillis,
