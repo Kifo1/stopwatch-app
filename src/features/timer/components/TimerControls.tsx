@@ -2,8 +2,8 @@ import Button from "@shared/components/Button";
 
 interface Props {
   isRunning: boolean;
-  onStartStop: any;
-  onReset: any;
+  onStartStop: () => void;
+  onReset: () => void;
 }
 
 export function TimerControls({ isRunning, onStartStop, onReset }: Props) {

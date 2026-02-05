@@ -1,9 +1,15 @@
 import TimerPage from "./features/timer/TimerPage";
+import Sidebar from "./shared/components/layout/Sidebar";
 
 function App() {
   return (
     <>
-      <TimerPage></TimerPage>
+      <div className="flex h-full w-full">
+        <Sidebar />
+        <div className="m-auto">
+          <TimerPage />
+        </div>
+      </div>
     </>
   );
 }
