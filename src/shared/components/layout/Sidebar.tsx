@@ -5,36 +5,35 @@ import {
   Settings,
   Timer,
 } from "lucide-react";
-import { useState } from "react";
+import { NavLink } from "react-router-dom";
 
-function NavbarItem({
-  name,
-  Icon,
-  active,
-  onClick,
-}: {
+interface NavbarItemProps {
   name: string;
   Icon: LucideIcon;
-  active?: boolean;
-  onClick?: () => void;
-}) {
+  to: string;
+}
+
+function NavbarItem({ name, Icon, to }: NavbarItemProps) {
   return (
-    <a
-      className={`${active ? "border-blue-500 text-blue-500 bg-blue-500/10" : "border-transparent hover:bg-gray-700 hover:text-white hover:border-transparent"} flex border items-center gap-3 px-3 py-2.5 rounded-lg text-blue-200 transition-colors`}
-      href="#"
-      onClick={onClick}
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `${
+          isActive
+            ? "border-blue-500 text-blue-500 bg-blue-500/10"
+            : "border-transparent text-blue-200 hover:bg-gray-700 hover:text-white"
+        } flex border items-center gap-3 px-3 py-2.5 rounded-lg transition-colors`
+      }
     >
       <span className="material-symbols-outlined group-hover:text-primary transition-colors">
         <Icon />
       </span>
       <span className="text-sm font-medium">{name}</span>
-    </a>
+    </NavLink>
   );
 }
 
 export default function Sidebar() {
-  const [activeItem, setActiveItem] = useState("Timer");
-
   return (
     <aside className="w-64 border-r flex border-blue-300 flex-col justify-between p-4">
       <div className="flex flex-col gap-6">
@@ -45,29 +44,21 @@ export default function Sidebar() {
           <p className="text-blue-200 text-xs font-normal">Track your time</p>
         </div>
         <nav className="flex flex-col gap-2">
-          <NavbarItem
-            name="Timer"
-            Icon={Timer}
-            active={activeItem === "Timer"}
-            onClick={() => setActiveItem("Timer")}
-          ></NavbarItem>
+          <NavbarItem name="Timer" Icon={Timer} to="/timer"></NavbarItem>
           <NavbarItem
             name="Projects"
             Icon={FolderDot}
-            active={activeItem === "Projects"}
-            onClick={() => setActiveItem("Projects")}
+            to="/projects"
           ></NavbarItem>
           <NavbarItem
-            name="Analysis"
+            name="Analytics"
             Icon={ChartLine}
-            active={activeItem === "Analysis"}
-            onClick={() => setActiveItem("Analysis")}
+            to="/analytics"
           ></NavbarItem>
           <NavbarItem
             name="Settings"
             Icon={Settings}
-            active={activeItem === "Settings"}
-            onClick={() => setActiveItem("Settings")}
+            to="/settings"
           ></NavbarItem>
         </nav>
       </div>
