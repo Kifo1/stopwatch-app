@@ -48,8 +48,8 @@ export default function FirstProjectTutorial() {
       <div className="text-center justify-center mt-30">
         <h2 className="text-white text-4xl font-semibold">No projects found</h2>
         <p className="text-blue-200 max-w-150 ml-auto mr-auto">
-          Get started with FocusFlow in three simple steps. Create your first
-          project to begin tracking your productivity journey.
+          Get started in three simple steps. Create your first project to begin
+          tracking your productivity journey.
         </p>
       </div>
       <div className="grid pt-15 pl-15 pr-15 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10">
