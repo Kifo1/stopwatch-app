@@ -1,6 +1,7 @@
 import { Navigate, Route, BrowserRouter, Routes } from "react-router-dom";
-import TimerPage from "./features/timer/TimerPage";
 import Sidebar from "./shared/components/layout/Sidebar";
+import TimerPage from "./shared/components/layout/TimerPage";
+import ProjectsPage from "./shared/components/layout/ProjectsPage";
 
 function App() {
   return (
@@ -11,12 +12,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/timer" />} />
             <Route path="/timer" element={<TimerPage />} />
-            <Route
-              path="/projects"
-              element={
-                <div className="text-white">Projects is coming soon...</div>
-              }
-            />
+            <Route path="/projects" element={<ProjectsPage />} />
             <Route
               path="/analytics"
               element={
