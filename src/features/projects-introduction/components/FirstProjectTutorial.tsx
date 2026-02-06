@@ -52,7 +52,7 @@ export default function FirstProjectTutorial() {
           project to begin tracking your productivity journey.
         </p>
       </div>
-      <div className="grid pt-15 pl-15 pr-15 grid-cols-3 gap-10">
+      <div className="grid pt-15 pl-15 pr-15 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10">
         <TutorialStep
           position={1}
           title="Create a Project"
