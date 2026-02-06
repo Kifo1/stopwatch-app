@@ -228,15 +228,31 @@ pub fn switch_timer_mode(timer_mode: String, state: tauri::State<'_, SharedTimer
 }
 
 #[tauri::command]
-pub fn get_current_time_millis(state: tauri::State<'_, SharedTimerState>) -> u64 {
+pub fn get_pomodoro_millis(state: tauri::State<'_, SharedTimerState>) -> u64 {
     let state = state.lock().unwrap();
-    match state.active_mode {
-        ActiveMode::Stopwatch => state.stopwatch.elapsed_millis,
-        ActiveMode::Pomodoro => state.pomodoro.current_phase_millis_left(),
-    }
+    state.pomodoro.current_phase_millis_left()
+}
+
+#[tauri::command]
+pub fn get_stopwatch_millis(state: tauri::State<'_, SharedTimerState>) -> u64 {
+    state.lock().unwrap().stopwatch.elapsed_millis
 }
 
 #[tauri::command]
 pub fn is_timer_running(state: tauri::State<'_, SharedTimerState>) -> bool {
     state.lock().unwrap().is_running
+}
+
+#[tauri::command]
+pub fn get_timer_mode(state: tauri::State<'_, SharedTimerState>) -> String {
+    let state = state.lock().unwrap();
+    match state.active_mode {
+        ActiveMode::Stopwatch => "stopwatch".into(),
+        ActiveMode::Pomodoro => "pomodoro".into(),
+    }
+}
+
+#[tauri::command]
+pub fn get_pomodoro_phase(state: tauri::State<'_, SharedTimerState>) -> u8 {
+    state.lock().unwrap().pomodoro.phase as u8
 }

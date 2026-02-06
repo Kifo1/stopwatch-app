@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { formatMillis } from "@shared/lib/utils";
 import { PomodoroPhases } from "./PomodoroPhases";
 
@@ -14,6 +15,16 @@ export function TimerDisplay({
   pomodoroPhase,
   isRunning,
 }: Props) {
+  const [transitionsEnabled, setTransitionsEnabled] = useState(false);
+
+  useEffect(() => {
+    const transitionTimeout = setTimeout(
+      () => setTransitionsEnabled(true),
+      200,
+    );
+    return () => clearTimeout(transitionTimeout);
+  }, []);
+
   const ratio =
     mode === "pomodoro" ? millis / getMaxMillisByPhase(pomodoroPhase) : 0;
   const R = 45;
@@ -57,7 +68,9 @@ export function TimerDisplay({
           className="text-slate-700 dark:text-surface-highlight"
         />
         <circle
-          className="text-blue-500 dark:text-primary transition-all duration-700 ease-in-out"
+          className={`text-blue-500 dark:text-primary ${
+            transitionsEnabled ? "transition-all duration-700 ease-in-out" : ""
+          }`}
           cx="50%"
           cy="50%"
           transform={"rotate(-90 50 50)"}

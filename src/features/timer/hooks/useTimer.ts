@@ -56,13 +56,17 @@ export function useTimer() {
 
   useEffect(() => {
     const syncWithBackend = async () => {
-      const backendTime: number = await invoke("get_current_time_millis");
+      const stopwatchMillis: number = await invoke("get_stopwatch_millis");
+      const pomodoroMillis: number = await invoke("get_pomodoro_millis");
       const backendIsRunning: boolean = await invoke("is_timer_running");
+      const mode: "stopwatch" | "pomodoro" = await invoke("get_timer_mode");
+      const pomodoroPhase: number = await invoke("get_pomodoro_phase");
 
+      setMode(mode);
       setIsRunning(backendIsRunning);
-      mode === "stopwatch"
-        ? setStopwatchMillis(backendTime)
-        : setPomodoroMillis(backendTime);
+      setStopwatchMillis(stopwatchMillis);
+      setPomodoroMillis(pomodoroMillis);
+      setPomodoroPhase(pomodoroPhase);
     };
 
     syncWithBackend();
