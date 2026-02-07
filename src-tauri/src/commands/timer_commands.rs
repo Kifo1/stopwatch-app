@@ -1,0 +1,69 @@
+use crate::models::timer::{SharedTimerState, ActiveMode};
+use crate::services::timer_service;
+use tauri::{AppHandle, State};
+
+#[tauri::command]
+pub async fn start_timer(
+    app: AppHandle,
+    state: State<'_, SharedTimerState>,
+) -> Result<(), String> {
+    timer_service::start_timer(app, state.inner().clone()).await
+}
+
+#[tauri::command]
+pub fn stop_timer(state: State<'_, SharedTimerState>) -> Result<(), String> {
+    timer_service::stop_timer(state.inner().clone())
+}
+
+#[tauri::command]
+pub async fn reset_timer(
+    app: AppHandle,
+    state: State<'_, SharedTimerState>,
+) -> Result<(), String> {
+    timer_service::reset_timer(app, state.inner().clone()).await
+}
+
+#[tauri::command]
+pub fn switch_timer_mode(
+    timer_mode: String,
+    state: State<'_, SharedTimerState>,
+) -> Result<(), String> {
+    let mut state = state.lock().map_err(|_| "Mutex Error")?;
+    
+    if timer_mode == "stopwatch" {
+        state.active_mode = ActiveMode::Stopwatch;
+    } else if timer_mode == "pomodoro" {
+        state.active_mode = ActiveMode::Pomodoro;
+    }
+    
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_pomodoro_millis(state: State<'_, SharedTimerState>) -> u64 {
+    state.lock().unwrap().pomodoro.current_phase_millis_left()
+}
+
+#[tauri::command]
+pub fn get_stopwatch_millis(state: State<'_, SharedTimerState>) -> u64 {
+    state.lock().unwrap().stopwatch.elapsed_millis
+}
+
+#[tauri::command]
+pub fn is_timer_running(state: State<'_, SharedTimerState>) -> bool {
+    state.lock().unwrap().is_running
+}
+
+#[tauri::command]
+pub fn get_timer_mode(state: State<'_, SharedTimerState>) -> String {
+    let state = state.lock().unwrap();
+    match state.active_mode {
+        ActiveMode::Stopwatch => "stopwatch".into(),
+        ActiveMode::Pomodoro => "pomodoro".into(),
+    }
+}
+
+#[tauri::command]
+pub fn get_pomodoro_phase(state: State<'_, SharedTimerState>) -> u8 {
+    state.lock().unwrap().pomodoro.phase as u8
+}
