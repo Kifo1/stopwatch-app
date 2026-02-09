@@ -1,9 +1,13 @@
 mod commands;
 mod models;
 mod services;
+mod database;
 
 use models::timer::TimerState;
-use std::sync::{Arc, Mutex};
+use models::dbstate::DbState;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use tauri::Manager;
+use std::{str::FromStr, sync::{Arc, Mutex}};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,6 +15,32 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            let handle = app.handle().clone();
+
+            let app_dir = handle.path().app_data_dir().expect("Failed to get app directory");
+            std::fs::create_dir_all(&app_dir).ok();
+
+            let db_path = app_dir.join("database.sqlite");
+            let db_url = format!(
+                "sqlite:{}",
+                db_path.to_str().expect("Path contains invalid UTF-8")
+            );
+            let connection_options = SqliteConnectOptions::from_str(&db_url)?
+                .create_if_missing(true)
+                .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal);
+
+            tauri::async_runtime::block_on(async move {
+                let pool = SqlitePoolOptions::new()
+                    .connect_with(connection_options)
+                    .await
+                    .expect("Unable to open database file");
+
+                handle.manage(DbState { pool });
+            });
+
+            Ok(())
+        })
         .manage(timer_state)
         .invoke_handler(tauri::generate_handler![
             commands::timer_commands::start_timer,
