@@ -36,6 +36,11 @@ pub fn run() {
                     .await
                     .expect("Unable to open database file");
 
+                sqlx::migrate!("./migrations")
+                    .run(&pool)
+                    .await
+                    .expect("Unable to run database migrations");
+
                 handle.manage(DbState { pool });
             });
 

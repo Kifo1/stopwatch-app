@@ -1,7 +1,27 @@
 import FirstProjectTutorial from "@/features/projects-introduction/components/FirstProjectTutorial";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
+
+interface Project {
+  id: number;
+  name: string;
+  description: string;
+  color: string;
+}
 
 export default function ProjectsPage() {
-  const userHasProjects = false;
+  const [projects, setProjects] = useState<Project[]>([]);
+  let userHasProjects = projects.length > 0;
+
+  useEffect(() => {
+    const syncProjects = async () => {
+      let projectList = await invoke<Project[]>("get_projects");
+      setProjects(projectList);
+      userHasProjects = projects.length > 0;
+    };
+
+    syncProjects();
+  }, []);
 
   return (
     <div>
