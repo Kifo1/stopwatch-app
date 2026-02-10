@@ -51,7 +51,9 @@ pub fn run() {
             commands::timer_commands::get_stopwatch_millis,
             commands::timer_commands::is_timer_running,
             commands::timer_commands::get_timer_mode,
-            commands::timer_commands::get_pomodoro_phase])
+            commands::timer_commands::get_pomodoro_phase,
+            commands::project_commands::create_project,
+            commands::project_commands::get_projects])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
