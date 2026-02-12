@@ -2,13 +2,14 @@ use crate::database::models::project::Project;
 use crate::models::dbstate::DbState;
 use tauri::State;
 
-pub async fn create_project(name: String, description: String, db: State<'_, DbState>) -> Result<(), String> {
+pub async fn create_project(name: String, description: String, color: String, db: State<'_, DbState>) -> Result<(), String> {
     let pool = &db.pool;
 
     sqlx::query!(
-        "INSERT INTO projects (name, description) VALUES (?, ?)",
+        "INSERT INTO projects (name, description, color) VALUES (?, ?, ?)",
         name,
-        description
+        description,
+        color
     ).execute(pool)
         .await
         .map_err(|e| e.to_string())?;

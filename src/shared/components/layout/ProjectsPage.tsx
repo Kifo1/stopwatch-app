@@ -1,4 +1,4 @@
-import FirstProjectTutorial from "@/features/projects-introduction/components/FirstProjectTutorial";
+import FirstProjectTutorial from "@features/projects/components/FirstProjectTutorial";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 

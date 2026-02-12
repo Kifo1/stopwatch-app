@@ -1,5 +1,7 @@
-import Button from "@/shared/components/Button";
+import Button from "@shared/components/Button";
 import { ChartLine, CirclePlus, LucideIcon, Plus, Timer } from "lucide-react";
+import { useState } from "react";
+import { CreateProjectModal } from "./CreateProjectModal";
 
 interface TutorialStepProps {
   position: number;
@@ -7,6 +9,7 @@ interface TutorialStepProps {
   description: string;
   Icon: LucideIcon;
   highlighted: boolean;
+  setIsModalOpen: any;
 }
 
 function TutorialStep({
@@ -15,6 +18,7 @@ function TutorialStep({
   description,
   Icon,
   highlighted,
+  setIsModalOpen,
 }: TutorialStepProps) {
   return (
     <div className="bg-slate-800 p-6 border rounded-2xl border-slate-700">
@@ -32,7 +36,10 @@ function TutorialStep({
         <h3 className="text-white text-2xl font-semibold">{title}</h3>
         <p className="text-blue-200 opacity-70 font-light">{description}</p>
         {highlighted && (
-          <Button className="font-medium rounded-md">
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="font-medium rounded-md"
+          >
             <Plus />
             Add Project
           </Button>
@@ -43,6 +50,8 @@ function TutorialStep({
 }
 
 export default function FirstProjectTutorial() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <>
       <div className="text-center justify-center mt-30">
@@ -59,6 +68,7 @@ export default function FirstProjectTutorial() {
           description="Set up a new workspace for your tasks and give it a name."
           Icon={CirclePlus}
           highlighted={true}
+          setIsModalOpen={setIsModalOpen}
         />
         <TutorialStep
           position={2}
@@ -66,6 +76,7 @@ export default function FirstProjectTutorial() {
           description="Select your project and hit play. Use Pomodoro intervals to stay focused."
           Icon={Timer}
           highlighted={false}
+          setIsModalOpen={setIsModalOpen}
         />
         <TutorialStep
           position={3}
@@ -73,8 +84,13 @@ export default function FirstProjectTutorial() {
           description="See detailed analytics of your time spent and improve your workflow."
           Icon={ChartLine}
           highlighted={false}
+          setIsModalOpen={setIsModalOpen}
         />
       </div>
+      <CreateProjectModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+      ></CreateProjectModal>
     </>
   );
 }
