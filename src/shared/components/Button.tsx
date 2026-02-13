@@ -12,7 +12,7 @@ const buttonVariants = cva("hover:cursor-pointer rounded", {
       danger: "",
       success: "",
       ghost:
-        "text-gray-400 font-semibold rounded-full hover:text-white transition-all flex justify-center gap-3",
+        "text-gray-400 font-semibold rounded-full flex justify-center gap-3",
     },
     scale: {
       sm: "pt-1.5 pb-1.5 pl-4 pr-4",

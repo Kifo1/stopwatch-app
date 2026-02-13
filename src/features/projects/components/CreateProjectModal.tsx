@@ -1,6 +1,7 @@
 import Button from "@/shared/components/Button";
 import { TextInput } from "@/shared/components/TextInput";
 import Modal from "@shared/components/Modal";
+import { invoke } from "@tauri-apps/api/core";
 import { useState } from "react";
 
 interface CreateProjectModalProps {
@@ -12,9 +13,18 @@ export function CreateProjectModal({
   isModalOpen,
   setIsModalOpen,
 }: CreateProjectModalProps) {
-  const [_projectName, setProjectName] = useState("");
-  const [_projectDescription, setProjectDescription] = useState("");
-  const [_projectColor, setProjectColor] = useState("#3B82F6");
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [projectColor, setProjectColor] = useState("#3B82F6");
+
+  const createProject = async () => {
+    await invoke("create_project", {
+      name: projectName,
+      description: projectDescription,
+      color: projectColor,
+    });
+    setIsModalOpen(false);
+  };
 
   return (
     <Modal
@@ -78,7 +88,9 @@ export function CreateProjectModal({
               onChange={(e) => setProjectColor(e.target.value)}
             ></input>
           </p>
-          <Button type="submit">Create Project</Button>
+          <Button type="submit" onClick={createProject}>
+            Create Project
+          </Button>
         </fieldset>
       </form>
     </Modal>

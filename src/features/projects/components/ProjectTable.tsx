@@ -1,0 +1,108 @@
+import Button from "@/shared/components/Button";
+import { Project } from "@/shared/components/layout/ProjectsPage";
+import { Clock3, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+
+interface ProjectTableEntryProps {
+  project: Project;
+}
+
+function ProjectTableEntry({ project }: ProjectTableEntryProps) {
+  console.log(project.color);
+  return (
+    <tr className="group">
+      <td className="px-6 py-5 whitespace-nowrap">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-2 h-8 rounded-full"
+            style={{ backgroundColor: project.color }}
+          ></div>
+          <div>
+            <p className="text-sm font-semibold text-white">{project.name}</p>
+            <p className="text-xs text-blue-200">{project.description}</p>
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-5 whitespace-nowrap">
+        <div
+          className="w-15 h-6 rounded-full"
+          style={{ backgroundColor: project.color }}
+        ></div>
+      </td>
+      <td className="px-6 py-5 whitespace-nowrap">
+        <div className="flex items-center gap-2">
+          <Clock3 color="white"></Clock3>
+          <span className="text-sm font-medium text-blue-200">
+            coming soon...
+          </span>
+        </div>
+      </td>
+      <td className="px-6 py-5 whitespace-nowrap">
+        <div className="flex items-center justify-end gap-5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Pencil className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-white"></Pencil>
+          <Trash2 className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-red-700"></Trash2>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+interface ProjectTableProps {
+  projects: Project[];
+}
+
+export function ProjectTable({ projects }: ProjectTableProps) {
+  const [page, _setPage] = useState(1);
+  return (
+    <div className="rounded-xl border border-slate-200/10 overflow-hidden bg-slate-200/5">
+      <div>
+        <table>
+          <thead>
+            <tr className="border-b border-slate-200/10 bg-slate-200/5">
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+                Project name
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+                Color tag
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+                Total time
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {projects.map((project) => (
+              <ProjectTableEntry key={project.id} project={project} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-200/5 border-slate-200/10 overflow-hidden">
+        <div className="text-sm text-blue-200">
+          <span>Showing </span>
+          <span className="font-medium text-white">1-4</span>
+          <span> of </span>
+          <span className="font-medium text-white">12</span>
+          <span> projects</span>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant={page === 1 ? "ghost" : "secondary"}
+            className="border border-white/20 rounded-xl"
+          >
+            Previous
+          </Button>
+          <Button
+            variant={"secondary"}
+            className="border border-white/20 rounded-xl"
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

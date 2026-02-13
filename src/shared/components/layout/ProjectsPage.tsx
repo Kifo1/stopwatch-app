@@ -1,8 +1,9 @@
+import { ProjectOverview } from "@/features/projects/components/ProjectOverview";
 import FirstProjectTutorial from "@features/projects/components/FirstProjectTutorial";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
-interface Project {
+export interface Project {
   id: number;
   name: string;
   description: string;
@@ -31,6 +32,7 @@ export default function ProjectsPage() {
           Organize and track your time across different projects.
         </p>
         {!userHasProjects && <FirstProjectTutorial />}
+        {userHasProjects && <ProjectOverview projects={projects} />}
       </div>
     </div>
   );
