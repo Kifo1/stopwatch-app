@@ -1,6 +1,7 @@
 import Button from "@/shared/components/Button";
 import { Project } from "@/shared/components/layout/ProjectsPage";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatSecondsToString } from "@/shared/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { Clock3, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -11,6 +12,13 @@ interface ProjectTableEntryProps {
 
 function ProjectTableEntry({ project }: ProjectTableEntryProps) {
   const queryClient = useQueryClient();
+
+  const { data: totalSeconds, isLoading } = useQuery({
+    queryKey: ["project_time", project.id],
+    queryFn: () =>
+      invoke<number>("get_overall_project_time", { projectId: project.id }),
+    refetchInterval: 10000,
+  });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => {
@@ -51,7 +59,11 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
         <div className="flex items-center gap-2">
           <Clock3 color="white"></Clock3>
           <span className="text-sm font-medium text-blue-200">
-            coming soon...
+            {isLoading ? (
+              <span className="animate-pulse opacity-50">Loading...</span>
+            ) : (
+              formatSecondsToString(totalSeconds || 0)
+            )}
           </span>
         </div>
       </td>
