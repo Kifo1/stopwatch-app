@@ -1,6 +1,7 @@
 import Button from "@/shared/components/Button";
 import { TextInput } from "@/shared/components/TextInput";
 import Modal from "@shared/components/Modal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { useState } from "react";
 
@@ -13,17 +14,26 @@ export function CreateProjectModal({
   isModalOpen,
   setIsModalOpen,
 }: CreateProjectModalProps) {
+  const queryClient = useQueryClient();
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectColor, setProjectColor] = useState("#3B82F6");
 
-  const createProject = async () => {
-    await invoke("create_project", {
+  const mutation = useMutation({
+    mutationFn: (newProject: any) => invoke("create_project", newProject),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      setIsModalOpen(false);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate({
       name: projectName,
       description: projectDescription,
       color: projectColor,
     });
-    setIsModalOpen(false);
   };
 
   return (
@@ -34,7 +44,7 @@ export function CreateProjectModal({
       setIsOpen={setIsModalOpen}
       className=""
     >
-      <form>
+      <form onSubmit={handleSubmit}>
         <fieldset className="flex flex-col items-center gap-5">
           <legend className="text-white text-4xl font-semibold pb-10">
             Create Project
@@ -88,8 +98,8 @@ export function CreateProjectModal({
               onChange={(e) => setProjectColor(e.target.value)}
             ></input>
           </p>
-          <Button type="submit" onClick={createProject}>
-            Create Project
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? "Creating..." : "Create Project"}
           </Button>
         </fieldset>
       </form>

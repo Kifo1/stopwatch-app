@@ -1,7 +1,7 @@
 import { ProjectOverview } from "@/features/projects/components/ProjectOverview";
 import FirstProjectTutorial from "@features/projects/components/FirstProjectTutorial";
+import { useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import { useEffect, useState } from "react";
 
 export interface Project {
   id: number;
@@ -11,29 +11,25 @@ export interface Project {
 }
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => invoke<Project[]>("get_projects"),
+  });
+
+  if (isLoading) return <div className="text-white">Loading...</div>;
+
   let userHasProjects = projects.length > 0;
-
-  useEffect(() => {
-    const syncProjects = async () => {
-      let projectList = await invoke<Project[]>("get_projects");
-      setProjects(projectList);
-      userHasProjects = projects.length > 0;
-    };
-
-    syncProjects();
-  }, []);
 
   return (
     <div>
-      <div>
-        <h1 className="text-white text-5xl font-bold">Manage Projects</h1>
-        <p className="text-blue-200 pt-3">
-          Organize and track your time across different projects.
-        </p>
-        {!userHasProjects && <FirstProjectTutorial />}
-        {userHasProjects && <ProjectOverview projects={projects} />}
-      </div>
+      <h1 className="text-white text-5xl font-bold">Manage Projects</h1>
+      <p className="text-blue-200 pt-3">Organize and track your time...</p>
+
+      {!userHasProjects ? (
+        <FirstProjectTutorial />
+      ) : (
+        <ProjectOverview projects={projects} />
+      )}
     </div>
   );
 }

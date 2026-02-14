@@ -29,3 +29,16 @@ pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, sqlx::
 
     projects
 }
+
+pub async fn delete_project(id: i64, db: State<'_, DbState>) -> Result<(), String> {
+    let pool = &db.pool;
+
+    sqlx::query!(
+        "DELETE FROM projects WHERE id = ?",
+        id
+    ).execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    Ok(())
+}

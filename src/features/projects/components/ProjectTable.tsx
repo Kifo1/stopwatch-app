@@ -1,5 +1,7 @@
 import Button from "@/shared/components/Button";
 import { Project } from "@/shared/components/layout/ProjectsPage";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { invoke } from "@tauri-apps/api/core";
 import { Clock3, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -8,7 +10,23 @@ interface ProjectTableEntryProps {
 }
 
 function ProjectTableEntry({ project }: ProjectTableEntryProps) {
-  console.log(project.color);
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => {
+      return invoke("delete_project", { id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+  });
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteMutation.mutate(project.id);
+  };
+
   return (
     <tr className="group">
       <td className="px-6 py-5 whitespace-nowrap">
@@ -40,7 +58,10 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
       <td className="px-6 py-5 whitespace-nowrap">
         <div className="flex items-center justify-end gap-5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Pencil className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-white"></Pencil>
-          <Trash2 className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-red-700"></Trash2>
+          <Trash2
+            className={`text-blue-200 hover:cursor-pointer hover:text-red-700 ${deleteMutation.isPending ? "opacity-50" : ""}`}
+            onClick={handleDelete}
+          />
         </div>
       </td>
     </tr>
@@ -83,9 +104,9 @@ export function ProjectTable({ projects }: ProjectTableProps) {
       <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-200/5 border-slate-200/10 overflow-hidden">
         <div className="text-sm text-blue-200">
           <span>Showing </span>
-          <span className="font-medium text-white">1-4</span>
+          <span className="font-medium text-white">{projects.length}</span>
           <span> of </span>
-          <span className="font-medium text-white">12</span>
+          <span className="font-medium text-white">{projects.length}</span>
           <span> projects</span>
         </div>
         <div className="flex gap-2">
