@@ -1,13 +1,16 @@
 mod commands;
+mod database;
 mod models;
 mod services;
-mod database;
 
-use models::timer::TimerState;
 use models::dbstate::DbState;
+use models::timer::TimerState;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use std::{
+    str::FromStr,
+    sync::{Arc, Mutex},
+};
 use tauri::Manager;
-use std::{str::FromStr, sync::{Arc, Mutex}};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -18,7 +21,10 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
 
-            let app_dir = handle.path().app_data_dir().expect("Failed to get app directory");
+            let app_dir = handle
+                .path()
+                .app_data_dir()
+                .expect("Failed to get app directory");
             std::fs::create_dir_all(&app_dir).ok();
 
             let db_path = app_dir.join("database.sqlite");
@@ -57,9 +63,12 @@ pub fn run() {
             commands::timer_commands::is_timer_running,
             commands::timer_commands::get_timer_mode,
             commands::timer_commands::get_pomodoro_phase,
+            commands::timer_commands::set_selected_project,
+            commands::timer_commands::get_selected_project,
             commands::project_commands::create_project,
             commands::project_commands::get_projects,
-            commands::project_commands::delete_project])
+            commands::project_commands::delete_project
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

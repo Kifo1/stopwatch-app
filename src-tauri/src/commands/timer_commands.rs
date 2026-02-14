@@ -1,12 +1,10 @@
-use crate::models::timer::{SharedTimerState, ActiveMode};
+use crate::database::models::project::Project;
+use crate::models::timer::{ActiveMode, SharedTimerState};
 use crate::services::timer_service;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
-pub async fn start_timer(
-    app: AppHandle,
-    state: State<'_, SharedTimerState>,
-) -> Result<(), String> {
+pub async fn start_timer(app: AppHandle, state: State<'_, SharedTimerState>) -> Result<(), String> {
     timer_service::start_timer(app, state.inner().clone()).await
 }
 
@@ -16,10 +14,7 @@ pub fn stop_timer(state: State<'_, SharedTimerState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn reset_timer(
-    app: AppHandle,
-    state: State<'_, SharedTimerState>,
-) -> Result<(), String> {
+pub async fn reset_timer(app: AppHandle, state: State<'_, SharedTimerState>) -> Result<(), String> {
     timer_service::reset_timer(app, state.inner().clone()).await
 }
 
@@ -29,13 +24,13 @@ pub fn switch_timer_mode(
     state: State<'_, SharedTimerState>,
 ) -> Result<(), String> {
     let mut state = state.lock().map_err(|_| "Mutex Error")?;
-    
+
     if timer_mode == "stopwatch" {
         state.active_mode = ActiveMode::Stopwatch;
     } else if timer_mode == "pomodoro" {
         state.active_mode = ActiveMode::Pomodoro;
     }
-    
+
     Ok(())
 }
 
@@ -66,4 +61,20 @@ pub fn get_timer_mode(state: State<'_, SharedTimerState>) -> String {
 #[tauri::command]
 pub fn get_pomodoro_phase(state: State<'_, SharedTimerState>) -> u8 {
     state.lock().unwrap().pomodoro.phase as u8
+}
+
+#[tauri::command]
+pub fn set_selected_project(
+    project: Option<Project>,
+    state: State<'_, SharedTimerState>,
+) -> Result<(), String> {
+    let mut timer = state.lock().map_err(|_| "Failed to lock state")?;
+    timer.selected_project = project;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_selected_project(state: State<'_, SharedTimerState>) -> Result<Option<Project>, String> {
+    let timer = state.lock().map_err(|_| "Failed to lock state")?;
+    Ok(timer.selected_project.clone())
 }

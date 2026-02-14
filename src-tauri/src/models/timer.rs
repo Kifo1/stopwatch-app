@@ -1,4 +1,6 @@
-use super::{stopwatch::StopwatchState, pomodoro::PomodoroState};
+use crate::database::models::project::Project;
+
+use super::{pomodoro::PomodoroState, stopwatch::StopwatchState};
 use std::sync::{Arc, Mutex};
 
 pub enum ActiveMode {
@@ -9,6 +11,7 @@ pub enum ActiveMode {
 pub struct TimerState {
     pub active_mode: ActiveMode,
     pub is_running: bool,
+    pub selected_project: Option<Project>,
 
     pub stopwatch: StopwatchState,
     pub pomodoro: PomodoroState,
@@ -19,6 +22,7 @@ impl TimerState {
         Self {
             active_mode: ActiveMode::Stopwatch,
             is_running: false,
+            selected_project: None,
             stopwatch: StopwatchState::new(),
             pomodoro: PomodoroState::new(),
         }

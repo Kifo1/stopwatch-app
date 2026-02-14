@@ -45,7 +45,7 @@ export function TimerDisplay({
   }
 
   return (
-    <div className="h-100 w-100 grid grid-rows-[2fr_1fr]">
+    <div className="relative h-100 w-100 grid grid-rows-[2fr_1fr]">
       <div className="flex flex-col mt-auto mb-10 justify-center text-center">
         <span className="text-white font-mono text-6xl font-bold tabular-nums">
           {formatMillis(millis)}

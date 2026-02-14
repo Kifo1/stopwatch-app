@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import phaseChangeSound from "@assets/pomodoro-phase-change.mp3";
+import { Project } from "@/shared/components/layout/ProjectsPage";
 
 export function useTimer() {
   const [stopwtachMillis, setStopwatchMillis] = useState(0);
   const [pomodoroMillis, setPomodoroMillis] = useState(25 * 60 * 1000);
   const [isRunning, setIsRunning] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
   const [pomodoroPhase, setPomodoroPhase] = useState(0);
   const phaseChangeAudio = new Audio(phaseChangeSound);
@@ -32,6 +34,11 @@ export function useTimer() {
     await stop();
     setMode(newMode);
     await invoke("switch_timer_mode", { timerMode: newMode });
+  };
+
+  const switchSelectedProject = async (project: Project) => {
+    setSelectedProject(project);
+    await invoke("set_selected_project", { project: project });
   };
 
   useEffect(() => {
@@ -61,12 +68,16 @@ export function useTimer() {
       const backendIsRunning: boolean = await invoke("is_timer_running");
       const mode: "stopwatch" | "pomodoro" = await invoke("get_timer_mode");
       const pomodoroPhase: number = await invoke("get_pomodoro_phase");
+      const selectedProject: Project | null = await invoke(
+        "get_selected_project",
+      );
 
       setMode(mode);
       setIsRunning(backendIsRunning);
       setStopwatchMillis(stopwatchMillis);
       setPomodoroMillis(pomodoroMillis);
       setPomodoroPhase(pomodoroPhase);
+      setSelectedProject(selectedProject);
     };
 
     syncWithBackend();
@@ -78,9 +89,11 @@ export function useTimer() {
     isRunning,
     mode,
     pomodoroPhase,
+    selectedProject,
     start,
     stop,
     reset,
     switchMode,
+    switchSelectedProject,
   };
 }

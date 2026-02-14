@@ -8,7 +8,6 @@ pub enum PomodoroPhase {
     LongBreak = 3,
 }
 
-
 pub struct PomodoroState {
     pub elapsed_millis: u64,
     pub start_instant: Option<Instant>,
@@ -34,7 +33,9 @@ impl PomodoroState {
 
     pub fn current_phase_millis_left(&self) -> u64 {
         let phase_millis = match self.phase {
-            PomodoroPhase::FocusOne | PomodoroPhase::FocusTwo => self.focus_minutes as u64 * 60 * 1000,
+            PomodoroPhase::FocusOne | PomodoroPhase::FocusTwo => {
+                self.focus_minutes as u64 * 60 * 1000
+            }
             PomodoroPhase::ShortBreak => self.short_break_minutes as u64 * 60 * 1000,
             PomodoroPhase::LongBreak => self.long_break_minutes as u64 * 60 * 1000,
         };

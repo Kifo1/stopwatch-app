@@ -2,7 +2,12 @@ use crate::database::models::project::Project;
 use crate::models::dbstate::DbState;
 use tauri::State;
 
-pub async fn create_project(name: String, description: String, color: String, db: State<'_, DbState>) -> Result<(), String> {
+pub async fn create_project(
+    name: String,
+    description: String,
+    color: String,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
     let pool = &db.pool;
 
     sqlx::query!(
@@ -10,9 +15,10 @@ pub async fn create_project(name: String, description: String, color: String, db
         name,
         description,
         color
-    ).execute(pool)
-        .await
-        .map_err(|e| e.to_string())?;
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -20,10 +26,7 @@ pub async fn create_project(name: String, description: String, color: String, db
 pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, sqlx::Error> {
     let pool = &db.pool;
 
-    let projects = sqlx::query_as!(
-        Project,
-        "SELECT id, name, description, color FROM projects"
-    )
+    let projects = sqlx::query_as!(Project, "SELECT id, name, description, color FROM projects")
         .fetch_all(pool)
         .await;
 
@@ -33,12 +36,10 @@ pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, sqlx::
 pub async fn delete_project(id: i64, db: State<'_, DbState>) -> Result<(), String> {
     let pool = &db.pool;
 
-    sqlx::query!(
-        "DELETE FROM projects WHERE id = ?",
-        id
-    ).execute(pool)
+    sqlx::query!("DELETE FROM projects WHERE id = ?", id)
+        .execute(pool)
         .await
         .map_err(|e| e.to_string())?;
-    
+
     Ok(())
 }
