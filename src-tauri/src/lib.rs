@@ -34,6 +34,7 @@ pub fn run() {
             );
             let connection_options = SqliteConnectOptions::from_str(&db_url)?
                 .create_if_missing(true)
+                .pragma("foreign_keys", "ON")
                 .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal);
 
             tauri::async_runtime::block_on(async move {
@@ -67,7 +68,8 @@ pub fn run() {
             commands::timer_commands::get_selected_project,
             commands::project_commands::create_project,
             commands::project_commands::get_projects,
-            commands::project_commands::delete_project
+            commands::project_commands::delete_project,
+            commands::analytics_commands::get_overall_project_time,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
