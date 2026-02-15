@@ -13,7 +13,7 @@ pub async fn start_session(
 ) -> Result<String, String> {
     let pool = &db.pool;
     let now = Utc::now();
-    let uuid = Uuid::new_v4().to_string(); 
+    let uuid = Uuid::new_v4().to_string();
 
     sqlx::query!(
         r#"

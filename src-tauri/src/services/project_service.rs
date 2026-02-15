@@ -30,7 +30,7 @@ pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, sqlx::
     let pool = &db.pool;
 
     let projects = sqlx::query_as!(
-        Project, 
+        Project,
         r#"
         SELECT 
             id as "id!",           
@@ -56,10 +56,13 @@ pub async fn delete_project(id: String, db: State<'_, DbState>) -> Result<(), St
         .await
         .map_err(|e| e.to_string())?;
 
-    sqlx::query!("UPDATE sessions SET is_deleted = 1 WHERE project_id = ?", id)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| e.to_string())?;
+    sqlx::query!(
+        "UPDATE sessions SET is_deleted = 1 WHERE project_id = ?",
+        id
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
 
     tx.commit().await.map_err(|e| e.to_string())?;
 
