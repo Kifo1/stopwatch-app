@@ -1,21 +1,33 @@
 use crate::database::models::project::Project;
+use crate::models::dbstate::DbState;
 use crate::models::timer::{ActiveMode, SharedTimerState};
 use crate::services::timer_service;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
-pub async fn start_timer(app: AppHandle, state: State<'_, SharedTimerState>) -> Result<(), String> {
-    timer_service::start_timer(app, state.inner().clone()).await
+pub async fn start_timer(
+    app: AppHandle,
+    state: State<'_, SharedTimerState>,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    timer_service::start_timer(app, state.inner().clone(), db).await
 }
 
 #[tauri::command]
-pub fn stop_timer(state: State<'_, SharedTimerState>) -> Result<(), String> {
-    timer_service::stop_timer(state.inner().clone())
+pub async fn stop_timer(
+    state: State<'_, SharedTimerState>,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    timer_service::stop_timer(state.inner().clone(), db).await
 }
 
 #[tauri::command]
-pub async fn reset_timer(app: AppHandle, state: State<'_, SharedTimerState>) -> Result<(), String> {
-    timer_service::reset_timer(app, state.inner().clone()).await
+pub async fn reset_timer(
+    app: AppHandle,
+    state: State<'_, SharedTimerState>,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    timer_service::reset_timer(app, state.inner().clone(), db).await
 }
 
 #[tauri::command]
@@ -64,13 +76,12 @@ pub fn get_pomodoro_phase(state: State<'_, SharedTimerState>) -> u8 {
 }
 
 #[tauri::command]
-pub fn set_selected_project(
+pub async fn set_selected_project(
     project: Option<Project>,
     state: State<'_, SharedTimerState>,
+    db: State<'_, DbState>,
 ) -> Result<(), String> {
-    let mut timer = state.lock().map_err(|_| "Failed to lock state")?;
-    timer.selected_project = project;
-    Ok(())
+    timer_service::update_project_session(project, state.inner().clone(), &db).await
 }
 
 #[tauri::command]

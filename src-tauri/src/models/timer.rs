@@ -12,6 +12,7 @@ pub struct TimerState {
     pub active_mode: ActiveMode,
     pub is_running: bool,
     pub selected_project: Option<Project>,
+    pub current_session_id: Option<i64>,
 
     pub stopwatch: StopwatchState,
     pub pomodoro: PomodoroState,
@@ -23,6 +24,7 @@ impl TimerState {
             active_mode: ActiveMode::Stopwatch,
             is_running: false,
             selected_project: None,
+            current_session_id: None,
             stopwatch: StopwatchState::new(),
             pomodoro: PomodoroState::new(),
         }

@@ -3,13 +3,12 @@ use crate::{
     models::dbstate::DbState,
 };
 use chrono::Utc;
-use tauri::State;
 
 pub async fn start_session(
     project_id: i64,
     session_type: SessionType,
     mode: TimerMode,
-    db: State<'_, DbState>,
+    db: &DbState,
 ) -> Result<i64, String> {
     let pool = &db.pool;
     let now = Utc::now();
@@ -32,7 +31,7 @@ pub async fn start_session(
     Ok(row.id)
 }
 
-pub async fn stop_session(session_id: i64, db: State<'_, DbState>) -> Result<(), String> {
+pub async fn stop_session(session_id: i64, db: &DbState) -> Result<(), String> {
     let pool = &db.pool;
     let now = Utc::now();
 
@@ -46,4 +45,13 @@ pub async fn stop_session(session_id: i64, db: State<'_, DbState>) -> Result<(),
     .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+pub async fn delete_incomplete_sessions(db: &DbState) -> Result<u64, String> {
+    let result = sqlx::query!("DELETE FROM sessions WHERE end_time IS NULL")
+        .execute(&db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(result.rows_affected())
 }

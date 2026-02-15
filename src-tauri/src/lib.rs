@@ -12,6 +12,8 @@ use std::{
 };
 use tauri::Manager;
 
+use crate::models::timer::SharedTimerState;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let timer_state = Arc::new(Mutex::new(TimerState::new()));
@@ -32,7 +34,9 @@ pub fn run() {
                 "sqlite:{}",
                 db_path.to_str().expect("Path contains invalid UTF-8")
             );
-            let connection_options = SqliteConnectOptions::from_str(&db_url)?
+
+            let connection_options = SqliteConnectOptions::from_str(&db_url)
+                .expect("Invalid DB URL")
                 .create_if_missing(true)
                 .pragma("foreign_keys", "ON")
                 .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal);
@@ -48,10 +52,40 @@ pub fn run() {
                     .await
                     .expect("Unable to run database migrations");
 
-                handle.manage(DbState { pool });
+                let db_state = DbState { pool };
+
+                let _ =
+                    crate::services::session_service::delete_incomplete_sessions(&db_state).await;
+
+                handle.manage(db_state);
             });
 
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                let app_handle = window.app_handle();
+
+                if let (Some(state), Some(db)) = (
+                    app_handle.try_state::<SharedTimerState>(),
+                    app_handle.try_state::<DbState>(),
+                ) {
+                    let state_handle = state.inner().clone();
+                    let db_handle = db.inner().clone();
+
+                    tauri::async_runtime::block_on(async {
+                        let session_id = {
+                            let mut state_lock = state_handle.lock().unwrap();
+                            crate::services::timer_service::stop_timer_inner(&mut state_lock)
+                        };
+
+                        if let Some(id) = session_id {
+                            let _ = crate::services::session_service::stop_session(id, &db_handle)
+                                .await;
+                        }
+                    });
+                }
+            }
         })
         .manage(timer_state)
         .invoke_handler(tauri::generate_handler![

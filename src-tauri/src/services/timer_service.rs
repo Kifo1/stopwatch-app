@@ -1,76 +1,150 @@
-use crate::models::timer::{ActiveMode, SharedTimerState};
+use crate::{
+    database::models::{
+        project::Project,
+        session::{SessionType, TimerMode},
+    },
+    models::{
+        dbstate::DbState,
+        timer::{ActiveMode, SharedTimerState},
+    },
+    services::session_service,
+};
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, State};
 use tokio::time::sleep;
 
-pub async fn start_timer(app: AppHandle, state: SharedTimerState) -> Result<(), String> {
-    {
-        let mut state = state.lock().map_err(|_| "Mutex Error")?;
+fn get_session_info(state: &crate::models::timer::TimerState) -> (SessionType, TimerMode) {
+    match state.active_mode {
+        ActiveMode::Stopwatch => (SessionType::Focus, TimerMode::Stopwatch),
+        ActiveMode::Pomodoro => (state.pomodoro.phase.into(), TimerMode::Pomodoro),
+    }
+}
 
-        if state.is_running {
-            return Err("Timer läuft bereits.".into());
+pub async fn start_timer(
+    app: AppHandle,
+    state: SharedTimerState,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    let (project_id, session_info) = {
+        let s = state.lock().map_err(|_| "Mutex Error")?;
+        if s.is_running {
+            return Ok(());
         }
-        state.is_running = true;
+        let pid = s.selected_project.as_ref().map(|p| p.id);
+        let info = get_session_info(&s);
+        (pid, info)
+    };
 
-        match state.active_mode {
+    let session_id = if let Some(pid) = project_id {
+        let (s_type, mode) = session_info;
+        Some(session_service::start_session(pid, s_type, mode, db.inner()).await?)
+    } else {
+        None
+    };
+
+    {
+        let mut state_lock = state.lock().map_err(|_| "Mutex Error")?;
+        state_lock.is_running = true;
+        state_lock.current_session_id = session_id;
+
+        let now = Instant::now();
+        match state_lock.active_mode {
             ActiveMode::Stopwatch => {
-                let stopwatch = &mut state.stopwatch;
-                stopwatch.start_instant = Some(if stopwatch.elapsed_millis > 0 {
-                    Instant::now() - Duration::from_millis(stopwatch.elapsed_millis)
-                } else {
-                    Instant::now()
-                });
+                state_lock.stopwatch.start_instant =
+                    Some(now - Duration::from_millis(state_lock.stopwatch.elapsed_millis));
             }
             ActiveMode::Pomodoro => {
-                let pomodoro = &mut state.pomodoro;
-                pomodoro.start_instant = Some(if pomodoro.elapsed_millis > 0 {
-                    Instant::now() - Duration::from_millis(pomodoro.elapsed_millis)
-                } else {
-                    Instant::now()
-                });
+                state_lock.pomodoro.start_instant =
+                    Some(now - Duration::from_millis(state_lock.pomodoro.elapsed_millis));
             }
         }
     }
 
+    let db_handle = db.inner().clone();
     let state_clone = state.clone();
 
     tauri::async_runtime::spawn(async move {
-        loop {
-            let elapsed = {
-                let mut state = state_clone.lock().unwrap();
+        let mut last_heartbeat = Instant::now();
+        let heartbeat_interval = Duration::from_secs(30);
 
-                if !state.is_running {
+        loop {
+            let mut session_to_stop: Option<i64> = None;
+            let mut new_session_data: Option<(i64, SessionType, TimerMode)> = None;
+            let mut current_id: Option<i64> = None;
+
+            let result = {
+                let mut s = state_clone.lock().unwrap();
+                if !s.is_running {
                     break;
                 }
 
-                match state.active_mode {
+                current_id = s.current_session_id;
+
+                match s.active_mode {
                     ActiveMode::Stopwatch => {
-                        let stopwatch = &mut state.stopwatch;
-                        if let Some(start) = stopwatch.start_instant {
-                            stopwatch.elapsed_millis = start.elapsed().as_millis() as u64;
+                        if let Some(start) = s.stopwatch.start_instant {
+                            s.stopwatch.elapsed_millis = start.elapsed().as_millis() as u64;
                         }
-                        stopwatch.elapsed_millis
+                        Ok(s.stopwatch.elapsed_millis)
                     }
                     ActiveMode::Pomodoro => {
-                        let pomodoro = &mut state.pomodoro;
-                        if let Some(start) = pomodoro.start_instant {
-                            pomodoro.elapsed_millis = start.elapsed().as_millis() as u64;
+                        if let Some(start) = s.pomodoro.start_instant {
+                            s.pomodoro.elapsed_millis = start.elapsed().as_millis() as u64;
                         }
-                        let millis_left = pomodoro.current_phase_millis_left();
+                        let left = s.pomodoro.current_phase_millis_left();
 
-                        if millis_left == 0 {
-                            pomodoro.start_next_phase();
-                            let _ = app.emit("pomodoro-phase", pomodoro.phase as u8);
-                            let _ = app.emit("pomodoro-phase-sound", ());
-                            pomodoro.current_phase_millis_left()
+                        if left == 0 {
+                            session_to_stop = s.current_session_id.take();
+                            s.pomodoro.start_next_phase();
+
+                            let new_phase = s.pomodoro.phase;
+                            if let Some(p) = &s.selected_project {
+                                new_session_data =
+                                    Some((p.id, new_phase.into(), TimerMode::Pomodoro));
+                            }
+
+                            s.pomodoro.start_instant = Some(Instant::now());
+                            s.pomodoro.elapsed_millis = 0;
+
+                            Err(new_phase as u8)
                         } else {
-                            millis_left
+                            Ok(left)
                         }
                     }
                 }
             };
 
-            let _ = app.emit("timer-tick", elapsed);
+            match result {
+                Ok(elapsed) => {
+                    let _ = app.emit("timer-tick", elapsed);
+                }
+                Err(phase_idx) => {
+                    let _ = app.emit("pomodoro-phase", phase_idx);
+                    let _ = app.emit("pomodoro-phase-sound", ());
+                    let _ = app.emit("timer-tick", 0); // UI auf 0 setzen
+                }
+            }
+
+            if let Some(id) = current_id {
+                if last_heartbeat.elapsed() >= heartbeat_interval {
+                    let _ = session_service::stop_session(id, &db_handle).await;
+                    last_heartbeat = Instant::now();
+                }
+            }
+
+            if let Some(id) = session_to_stop {
+                let _ = session_service::stop_session(id, &db_handle).await;
+            }
+
+            if let Some((pid, s_type, mode)) = new_session_data {
+                if let Ok(nid) = session_service::start_session(pid, s_type, mode, &db_handle).await
+                {
+                    if let Ok(mut s) = state_clone.lock() {
+                        s.current_session_id = Some(nid);
+                    }
+                }
+            }
+
             sleep(Duration::from_millis(100)).await;
         }
     });
@@ -78,17 +152,25 @@ pub async fn start_timer(app: AppHandle, state: SharedTimerState) -> Result<(), 
     Ok(())
 }
 
-pub fn stop_timer(state: SharedTimerState) -> Result<(), String> {
-    let mut state = state.lock().map_err(|_| "Mutex Error")?;
-    stop_timer_inner(&mut state);
+pub async fn stop_timer(state: SharedTimerState, db: State<'_, DbState>) -> Result<(), String> {
+    let session_id = {
+        let mut state_lock = state.lock().map_err(|_| "Mutex Error")?;
+        stop_timer_inner(&mut state_lock)
+    };
+
+    if let Some(id) = session_id {
+        session_service::stop_session(id, db.inner()).await?;
+    }
+
     Ok(())
 }
 
-fn stop_timer_inner(state: &mut crate::models::timer::TimerState) {
+pub fn stop_timer_inner(state: &mut crate::models::timer::TimerState) -> Option<i64> {
     if !state.is_running {
-        return;
+        return None;
     }
 
+    let session_id = state.current_session_id.take();
     state.is_running = false;
 
     match state.active_mode {
@@ -96,37 +178,86 @@ fn stop_timer_inner(state: &mut crate::models::timer::TimerState) {
             if let Some(start) = state.stopwatch.start_instant {
                 state.stopwatch.elapsed_millis = start.elapsed().as_millis() as u64;
             }
+            state.stopwatch.start_instant = None;
         }
         ActiveMode::Pomodoro => {
             if let Some(start) = state.pomodoro.start_instant {
                 state.pomodoro.elapsed_millis = start.elapsed().as_millis() as u64;
             }
+            state.pomodoro.start_instant = None;
         }
     }
+
+    session_id
 }
 
-pub async fn reset_timer(app: AppHandle, state: SharedTimerState) -> Result<(), String> {
+pub async fn reset_timer(
+    app: AppHandle,
+    state: SharedTimerState,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
     let was_running = {
-        let mut state_guard = state.lock().map_err(|_| "Mutex Error")?;
-        let was_running = state_guard.is_running;
+        let mut state_lock = state.lock().map_err(|_| "Mutex Error")?;
+        let was_running = state_lock.is_running;
 
-        stop_timer_inner(&mut state_guard);
+        let session_id = stop_timer_inner(&mut state_lock);
 
-        match state_guard.active_mode {
-            ActiveMode::Stopwatch => state_guard.stopwatch.elapsed_millis = 0,
+        match state_lock.active_mode {
+            ActiveMode::Stopwatch => state_lock.stopwatch.elapsed_millis = 0,
             ActiveMode::Pomodoro => {
-                state_guard.pomodoro.elapsed_millis = 0;
-                state_guard.pomodoro.phase = crate::models::pomodoro::PomodoroPhase::FocusOne;
-                let _ = app.emit("pomodoro-phase", state_guard.pomodoro.phase as u8);
+                state_lock.pomodoro.elapsed_millis = 0;
+                state_lock.pomodoro.phase = crate::models::pomodoro::PomodoroPhase::FocusOne;
+                let _ = app.emit("pomodoro-phase", state_lock.pomodoro.phase as u8);
             }
         }
-
-        was_running
+        (was_running, session_id)
     };
 
-    if was_running {
-        start_timer(app, state).await
+    if let Some(id) = was_running.1 {
+        let _ = session_service::stop_session(id, db.inner()).await;
+    }
+
+    if was_running.0 {
+        start_timer(app, state, db).await
     } else {
         Ok(())
     }
+}
+
+pub async fn update_project_session(
+    project: Option<Project>,
+    state: SharedTimerState,
+    db: &DbState,
+) -> Result<(), String> {
+    let (is_running, old_session_id, session_info) = {
+        let mut state_lock = state.lock().map_err(|_| "Mutex Error")?;
+        let is_running = state_lock.is_running;
+        let old_id = state_lock.current_session_id.take();
+
+        state_lock.selected_project = project.clone();
+
+        let info = if is_running {
+            Some(get_session_info(&state_lock))
+        } else {
+            None
+        };
+        (is_running, old_id, info)
+    };
+
+    if is_running {
+        if let Some(id) = old_session_id {
+            let _ = session_service::stop_session(id, db).await;
+        }
+
+        if let Some(p) = project {
+            if let Some((s_type, mode)) = session_info {
+                let new_id = session_service::start_session(p.id, s_type, mode, db).await?;
+                if let Ok(mut s) = state.lock() {
+                    s.current_session_id = Some(new_id);
+                }
+            }
+        }
+    }
+
+    Ok(())
 }

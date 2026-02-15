@@ -1,11 +1,23 @@
 use std::time::Instant;
 
+use crate::database::models::session::SessionType;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PomodoroPhase {
     FocusOne = 0,
     ShortBreak = 1,
     FocusTwo = 2,
     LongBreak = 3,
+}
+
+impl From<PomodoroPhase> for SessionType {
+    fn from(phase: PomodoroPhase) -> Self {
+        match phase {
+            PomodoroPhase::FocusOne | PomodoroPhase::FocusTwo => SessionType::Focus,
+            PomodoroPhase::ShortBreak => SessionType::ShortBreak,
+            PomodoroPhase::LongBreak => SessionType::LongBreak,
+        }
+    }
 }
 
 pub struct PomodoroState {
