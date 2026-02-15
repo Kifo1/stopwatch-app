@@ -1,12 +1,12 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, description, color FROM projects",
+  "query": "\n        SELECT \n            id as \"id!\",           \n            name, \n            description,\n            color, \n            is_deleted as \"is_deleted: i64\"\n        FROM projects \n        WHERE is_deleted = 0\n        ",
   "describe": {
     "columns": [
       {
-        "name": "id",
+        "name": "id!",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Text"
       },
       {
         "name": "name",
@@ -22,17 +22,23 @@
         "name": "color",
         "ordinal": 3,
         "type_info": "Text"
+      },
+      {
+        "name": "is_deleted: i64",
+        "ordinal": 4,
+        "type_info": "Integer"
       }
     ],
     "parameters": {
       "Right": 0
     },
     "nullable": [
+      true,
       false,
       false,
       false,
       false
     ]
   },
-  "hash": "be5999b21547b523fc34c8c4b7caf768839ba72026e5af87b5219e641a817d84"
+  "hash": "add6a00ffeec0b52b4c4d0d0516d6ca71a5157061cddcc840c1572b3be112d76"
 }

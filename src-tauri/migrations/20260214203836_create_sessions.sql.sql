@@ -1,11 +1,13 @@
 -- Create sessions table
 CREATE TABLE IF NOT EXISTS sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id INTEGER NOT NULL,
-    start_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    start_time TEXT NOT NULL,
     end_time TEXT,
-    session_type TEXT NOT NULL, -- 'FOCUS', 'SHORT_BREAK', 'LONG_BREAK'
-    mode TEXT NOT NULL, -- 'STOPWATCH', 'POMODORO'
+    last_heartbeat TEXT NOT NULL,
+    session_type TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    is_deleted INTEGER NOT NULL DEFAULT 0,
     CONSTRAINT fk_projects
         FOREIGN KEY (project_id) 
         REFERENCES projects (id) 

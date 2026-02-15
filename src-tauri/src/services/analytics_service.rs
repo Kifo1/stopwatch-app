@@ -1,8 +1,9 @@
-use crate::models::dbstate::DbState;
 use tauri::State;
 
+use crate::models::dbstate::DbState;
+
 pub async fn get_overall_project_time(
-    project_id: i64,
+    project_id: String,
     db: State<'_, DbState>,
 ) -> Result<u64, String> {
     let pool = &db.pool;
@@ -13,12 +14,13 @@ pub async fn get_overall_project_time(
             SUM(
                 CASE 
                     WHEN end_time IS NOT NULL THEN (strftime('%s', end_time) - strftime('%s', start_time))
-                    ELSE (strftime('%s', 'now') - strftime('%s', start_time))
+                    ELSE (strftime('%s', last_heartbeat) - strftime('%s', start_time))
                 END
             ) AS "total_seconds!: i64"
         FROM sessions
         WHERE project_id = ?
         AND session_type = 'FOCUS'
+        AND is_deleted = 0
         "#,
         project_id,
     )

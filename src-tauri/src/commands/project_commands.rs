@@ -24,7 +24,7 @@ pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, String
 }
 
 #[tauri::command]
-pub async fn delete_project(id: i64, db: State<'_, DbState>) -> Result<(), String> {
+pub async fn delete_project(id: String, db: State<'_, DbState>) -> Result<(), String> {
     project_service::delete_project(id, db)
         .await
         .expect("Cannot delete project");

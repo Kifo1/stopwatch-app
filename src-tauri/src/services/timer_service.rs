@@ -30,7 +30,7 @@ pub async fn start_timer(
         if s.is_running {
             return Ok(());
         }
-        let pid = s.selected_project.as_ref().map(|p| p.id);
+        let pid = s.selected_project.as_ref().map(|p| p.id.clone());
         let info = get_session_info(&s);
         (pid, info)
     };
@@ -68,9 +68,9 @@ pub async fn start_timer(
         let heartbeat_interval = Duration::from_secs(30);
 
         loop {
-            let mut session_to_stop: Option<i64> = None;
-            let mut new_session_data: Option<(i64, SessionType, TimerMode)> = None;
-            let mut current_id: Option<i64> = None;
+            let mut session_to_stop: Option<String> = None;
+            let mut new_session_data: Option<(String, SessionType, TimerMode)> = None;
+            let mut current_id: Option<String> = None;
 
             let result = {
                 let mut s = state_clone.lock().unwrap();
@@ -78,7 +78,7 @@ pub async fn start_timer(
                     break;
                 }
 
-                current_id = s.current_session_id;
+                current_id = s.current_session_id.clone();
 
                 match s.active_mode {
                     ActiveMode::Stopwatch => {
@@ -100,7 +100,7 @@ pub async fn start_timer(
                             let new_phase = s.pomodoro.phase;
                             if let Some(p) = &s.selected_project {
                                 new_session_data =
-                                    Some((p.id, new_phase.into(), TimerMode::Pomodoro));
+                                    Some((p.id.clone(), new_phase.into(), TimerMode::Pomodoro));
                             }
 
                             s.pomodoro.start_instant = Some(Instant::now());
@@ -165,7 +165,7 @@ pub async fn stop_timer(state: SharedTimerState, db: State<'_, DbState>) -> Resu
     Ok(())
 }
 
-pub fn stop_timer_inner(state: &mut crate::models::timer::TimerState) -> Option<i64> {
+pub fn stop_timer_inner(state: &mut crate::models::timer::TimerState) -> Option<String> {
     if !state.is_running {
         return None;
     }

@@ -21,7 +21,7 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => {
+    mutationFn: (id: string) => {
       return invoke("delete_project", { id });
     },
     onSuccess: () => {

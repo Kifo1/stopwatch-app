@@ -12,7 +12,7 @@ pub struct TimerState {
     pub active_mode: ActiveMode,
     pub is_running: bool,
     pub selected_project: Option<Project>,
-    pub current_session_id: Option<i64>,
+    pub current_session_id: Option<String>,
 
     pub stopwatch: StopwatchState,
     pub pomodoro: PomodoroState,

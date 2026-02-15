@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT \n            SUM(\n                CASE \n                    WHEN end_time IS NOT NULL THEN (strftime('%s', end_time) - strftime('%s', start_time))\n                    ELSE (strftime('%s', last_heartbeat) - strftime('%s', start_time))\n                END\n            ) AS \"total_seconds!: i64\"\n        FROM sessions\n        WHERE project_id = ?\n        AND session_type = 'FOCUS'\n        AND is_deleted = 0\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "total_seconds!: i64",
+        "ordinal": 0,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "00c3dd002e6f78ca681ab2f1793f35b8a5b896bc3d7c0d6be199d0737f12557f"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE sessions SET last_heartbeat = ? WHERE id = ? AND is_deleted = 0",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "1d9a09503fb044bfc3e8356cc757a8fa1271c916fe0982167aa8ba254b383557"
+}

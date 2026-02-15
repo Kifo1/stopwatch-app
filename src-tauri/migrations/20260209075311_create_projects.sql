@@ -1,11 +1,12 @@
 -- Create projects table
 CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     color TEXT NOT NULL DEFAULT '#3B82F6',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_deleted INTEGER NOT NULL DEFAULT 0 -- 0 = active, 1 = deleted
 );
 
 -- Index names for search optimization

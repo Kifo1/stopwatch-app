@@ -8,3 +8,6 @@
 
 # Ignore .env file for local db validation by sqlx
 .env
+
+# Ignore sqlx query cache
+/.sqlx
