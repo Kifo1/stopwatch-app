@@ -4,6 +4,9 @@ import { useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
 import { Project } from "@/shared/components/layout/ProjectsPage";
 import { ProjectTable } from "./ProjectTable";
+import { invoke } from "@tauri-apps/api/core";
+import { useQuery } from "@tanstack/react-query";
+import { formatSecondsToString } from "@/shared/lib/utils";
 
 interface OverallInfoComponentProps {
   title: string;
@@ -28,6 +31,12 @@ interface ProjectOverviewProps {
 export function ProjectOverview({ projects }: ProjectOverviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { data: todaysTotalSeconds, isLoading: isLoading } = useQuery({
+    queryKey: ["todays_overall_time"],
+    queryFn: () => invoke<number>("get_todays_overall_time"),
+    refetchInterval: 10000,
+  });
+
   return (
     <>
       <div className="flex flex-col gap-10 mt-15">
@@ -39,7 +48,11 @@ export function ProjectOverview({ projects }: ProjectOverviewProps) {
           <div className="w-px h-auto bg-slate-200/10"></div>
           <OverallInfoComponent
             title="Time tracked today"
-            value="coming soon..."
+            value={
+              isLoading
+                ? "Loading..."
+                : formatSecondsToString(todaysTotalSeconds || 0)
+            }
           />
           <div className="w-px h-auto bg-slate-200/10"></div>
           <OverallInfoComponent title="Most active" value="coming soon..." />

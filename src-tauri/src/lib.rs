@@ -104,6 +104,7 @@ pub fn run() {
             commands::project_commands::get_projects,
             commands::project_commands::delete_project,
             commands::analytics_commands::get_overall_project_time,
+            commands::analytics_commands::get_todays_overall_time,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

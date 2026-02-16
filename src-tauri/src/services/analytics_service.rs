@@ -30,3 +30,37 @@ pub async fn get_overall_project_time(
 
     Ok(record.total_seconds.max(0) as u64)
 }
+
+pub async fn get_todays_overall_time(db: State<'_, DbState>) -> Result<u64, String> {
+    let pool = &db.pool;
+
+    let record = sqlx::query!(
+        r#"
+    SELECT
+        SUM(
+            MIN(
+                strftime('%s', COALESCE(end_time, last_heartbeat, 'now')), 
+                strftime('%s', 'now')
+            ) - 
+            MAX(
+                strftime('%s', start_time), 
+                strftime('%s', 'now', 'start of day')
+            )
+        ) AS "total_seconds!: i64"
+    FROM sessions
+    WHERE session_type = 'FOCUS'
+    AND is_deleted = 0
+    AND (
+        (start_time >= datetime('now', 'start of day')) 
+        OR 
+        (COALESCE(end_time, last_heartbeat, 'now') > datetime('now', 'start of day'))
+    )
+    AND start_time < datetime('now', 'start of day', '+1 day')
+    "#
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(record.total_seconds.max(0) as u64)
+}

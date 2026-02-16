@@ -13,8 +13,8 @@ interface ProjectTableEntryProps {
 function ProjectTableEntry({ project }: ProjectTableEntryProps) {
   const queryClient = useQueryClient();
 
-  const { data: totalSeconds, isLoading } = useQuery({
-    queryKey: ["project_time", project.id],
+  const { data: totalSeconds, isLoading: isLoading } = useQuery({
+    queryKey: ["overall_project_time", project.id],
     queryFn: () =>
       invoke<number>("get_overall_project_time", { projectId: project.id }),
     refetchInterval: 10000,
