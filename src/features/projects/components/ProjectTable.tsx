@@ -37,8 +37,8 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
 
   return (
     <tr className="group">
-      <td className="px-6 py-5 whitespace-nowrap">
-        <div className="flex items-center gap-3">
+      <td className="grid- px-2 pt-6 pb-6  py-2 md:px-6 md:py-5 whitespace-nowrap">
+        <div className="flex items-center gap-2 md:gap-3">
           <div
             className="w-2 h-8 rounded-full"
             style={{ backgroundColor: project.color }}
@@ -49,13 +49,13 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
           </div>
         </div>
       </td>
-      <td className="px-6 py-5 whitespace-nowrap">
+      <td className="px-2 pt-6 pb-6  py-2 md:px-6 md:py-5 whitespace-nowrap">
         <div
-          className="w-15 h-6 rounded-full"
+          className="w-6 md:w-15 h-6 rounded-full"
           style={{ backgroundColor: project.color }}
         ></div>
       </td>
-      <td className="px-6 py-5 whitespace-nowrap">
+      <td className="px-2 pt-6 pb-6  py-2 md:px-6 md:py-5 whitespace-nowrap">
         <div className="flex items-center gap-2">
           <Clock3 color="white"></Clock3>
           <span className="text-sm font-medium text-blue-200">
@@ -67,7 +67,7 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
           </span>
         </div>
       </td>
-      <td className="px-6 py-5 whitespace-nowrap">
+      <td className="px-2 pt-6 pb-6  py-2 md:px-6 md:py-5 whitespace-nowrap">
         <div className="flex items-center justify-end gap-5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Pencil className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-white"></Pencil>
           <Trash2
@@ -92,16 +92,16 @@ export function ProjectTable({ projects }: ProjectTableProps) {
         <table>
           <thead>
             <tr className="border-b border-slate-200/10 bg-slate-200/5">
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+              <th className="px-2 pt-6 pb-6 py-2 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
                 Project name
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+              <th className="px-2 pt-6 pb-6 py-2 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
                 Color tag
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+              <th className="px-2 pt-6 pb-6 py-2 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
                 Total time
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
+              <th className="px-2 pt-6 pb-6 py-2 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wider text-blue-200 w-1/3">
                 Actions
               </th>
             </tr>

@@ -13,10 +13,10 @@ interface OverallInfoComponentProps {
 function OverallInfoComponent({ title, value }: OverallInfoComponentProps) {
   return (
     <div className="flex flex-col">
-      <span className="text-blue-200 font-semibold text-sm uppercase">
+      <span className="text-blue-200 font-semibold text-xs lg:text-sm uppercase">
         {title}
       </span>
-      <span className="text-white text-3xl font-bold">{value}</span>
+      <span className="text-white text-2xl lg:text-3xl font-bold">{value}</span>
     </div>
   );
 }
@@ -47,7 +47,7 @@ export function ProjectOverview({ projects }: ProjectOverviewProps) {
             onClick={() => setIsModalOpen(true)}
             className="font-medium rounded-md ml-auto"
           >
-            <Plus />
+            <Plus className="hidden lg:inline" />
             Add Project
           </Button>
         </div>
