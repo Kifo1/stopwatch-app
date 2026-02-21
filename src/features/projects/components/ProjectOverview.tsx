@@ -37,6 +37,12 @@ export function ProjectOverview({ projects }: ProjectOverviewProps) {
     refetchInterval: 10000,
   });
 
+  const { data: mostActiveProjectName, isLoading: nameIsLoading } = useQuery({
+    queryKey: ["most_active_project_name"],
+    queryFn: () => invoke<string>("get_most_active_project_name"),
+    refetchInterval: 10000,
+  });
+
   return (
     <>
       <div className="flex flex-col gap-10 mt-15">
@@ -55,7 +61,10 @@ export function ProjectOverview({ projects }: ProjectOverviewProps) {
             }
           />
           <div className="w-px h-auto bg-slate-200/10"></div>
-          <OverallInfoComponent title="Most active" value="coming soon..." />
+          <OverallInfoComponent
+            title="Most active"
+            value={nameIsLoading ? "Loading..." : mostActiveProjectName || ""}
+          />
           <Button
             onClick={() => setIsModalOpen(true)}
             className="font-medium rounded-md ml-auto"

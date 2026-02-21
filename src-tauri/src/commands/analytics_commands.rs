@@ -20,3 +20,11 @@ pub async fn get_todays_overall_time(db: State<'_, DbState>) -> Result<u64, Stri
         .expect("Couldn't calculate todays overall time.");
     Ok(todays_overall_time)
 }
+
+#[tauri::command]
+pub async fn get_most_active_project_name(db: State<'_, DbState>) -> Result<String, String> {
+    let most_active_project_name = analytics_service::get_most_active_project_name(db)
+        .await
+        .expect("Couldn't receive most active project name.");
+    Ok(most_active_project_name)
+}
