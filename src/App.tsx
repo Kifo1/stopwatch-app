@@ -5,6 +5,7 @@ import ProjectsPage from "./shared/components/layout/ProjectsPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import AnalyticsPage from "./shared/components/layout/AnalyticsPage";
 
 const queryClient = new QueryClient();
 
@@ -19,12 +20,7 @@ function App() {
               <Route path="/" element={<Navigate to="/timer" />} />
               <Route path="/timer" element={<TimerPage />} />
               <Route path="/projects" element={<ProjectsPage />} />
-              <Route
-                path="/analytics"
-                element={
-                  <div className="text-white">Analytics is coming soon...</div>
-                }
-              />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               <Route
                 path="/settings"
                 element={
