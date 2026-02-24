@@ -24,7 +24,6 @@ pub struct Session {
     pub project_id: String,
     pub start_time: DateTime<Utc>,
     pub end_time: Option<DateTime<Utc>>,
-    pub last_heartbeat: DateTime<Utc>,
     pub session_type: SessionType,
     pub mode: TimerMode,
     pub is_deleted: i64,

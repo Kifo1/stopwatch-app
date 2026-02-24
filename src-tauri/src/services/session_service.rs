@@ -17,14 +17,13 @@ pub async fn start_session(
 
     sqlx::query!(
         r#"
-        INSERT INTO sessions (id, project_id, session_type, mode, start_time, last_heartbeat)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO sessions (id, project_id, session_type, mode, start_time)
+        VALUES (?, ?, ?, ?, ?)
         "#,
         uuid,
         project_id,
         session_type,
         mode,
-        now,
         now
     )
     .execute(pool)
@@ -32,22 +31,6 @@ pub async fn start_session(
     .map_err(|e| e.to_string())?;
 
     Ok(uuid)
-}
-
-pub async fn session_heartbeat(session_id: String, db: &DbState) -> Result<(), String> {
-    let pool = &db.pool;
-    let now = Utc::now();
-
-    sqlx::query!(
-        "UPDATE sessions SET last_heartbeat = ? WHERE id = ? AND is_deleted = 0",
-        now,
-        session_id
-    )
-    .execute(pool)
-    .await
-    .map_err(|e| e.to_string())?;
-
-    Ok(())
 }
 
 pub async fn stop_session(session_id: String, db: &DbState) -> Result<(), String> {

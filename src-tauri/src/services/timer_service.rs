@@ -70,7 +70,7 @@ pub async fn start_timer(
         loop {
             let mut session_to_stop: Option<String> = None;
             let mut new_session_data: Option<(String, SessionType, TimerMode)> = None;
-            let mut current_id: Option<String> = None;
+            let current_id;
 
             let result = {
                 let mut s = state_clone.lock().unwrap();
@@ -121,7 +121,7 @@ pub async fn start_timer(
                 Err(phase_idx) => {
                     let _ = app.emit("pomodoro-phase", phase_idx);
                     let _ = app.emit("pomodoro-phase-sound", ());
-                    let _ = app.emit("timer-tick", 0); // UI auf 0 setzen
+                    let _ = app.emit("timer-tick", 0);
                 }
             }
 

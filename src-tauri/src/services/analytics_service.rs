@@ -14,7 +14,7 @@ pub async fn get_overall_project_time(
             SUM(
                 CASE 
                     WHEN end_time IS NOT NULL THEN (strftime('%s', end_time) - strftime('%s', start_time))
-                    ELSE (strftime('%s', last_heartbeat) - strftime('%s', start_time))
+                    ELSE (strftime('%s', 'now') - strftime('%s', start_time))
                 END
             ) AS "total_seconds!: i64"
         FROM sessions
@@ -39,7 +39,7 @@ pub async fn get_todays_overall_time(db: State<'_, DbState>) -> Result<u64, Stri
     SELECT
         SUM(
             MIN(
-                strftime('%s', COALESCE(end_time, last_heartbeat, 'now')), 
+                strftime('%s', COALESCE(end_time, 'now')), 
                 strftime('%s', 'now')
             ) - 
             MAX(
@@ -53,7 +53,7 @@ pub async fn get_todays_overall_time(db: State<'_, DbState>) -> Result<u64, Stri
     AND (
         (start_time >= datetime('now', 'start of day')) 
         OR 
-        (COALESCE(end_time, last_heartbeat, 'now') > datetime('now', 'start of day'))
+        (COALESCE(end_time, 'now') > datetime('now', 'start of day'))
     )
     AND start_time < datetime('now', 'start of day', '+1 day')
     "#
@@ -82,7 +82,7 @@ pub async fn get_most_active_project_name(db: State<'_, DbState>) -> Result<Stri
         ORDER BY SUM(
             CASE 
                 WHEN s.end_time IS NOT NULL THEN (strftime('%s', s.end_time) - strftime('%s', s.start_time))
-                ELSE (strftime('%s', s.last_heartbeat) - strftime('%s', s.start_time))
+                ELSE (strftime('%s', 'now') - strftime('%s', s.start_time))
             END
         ) DESC
         LIMIT 1
