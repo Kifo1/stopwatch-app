@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatMillis } from "@shared/lib/utils";
 import { PomodoroPhases } from "./PomodoroPhases";
+import { useSettings } from "@/features/settings/hooks/useSettings";
 
 interface Props {
   millis: number;
@@ -15,6 +16,7 @@ export function TimerDisplay({
   pomodoroPhase,
   isRunning,
 }: Props) {
+  const { settings } = useSettings();
   const [transitionsEnabled, setTransitionsEnabled] = useState(false);
 
   useEffect(() => {
@@ -31,16 +33,18 @@ export function TimerDisplay({
   const CIRC = 2 * Math.PI * R;
 
   function getMaxMillisByPhase(phase: number) {
+    if (!settings) return 25 * 60 * 1000;
+
     switch (phase) {
       case 0:
       case 2:
-        return 25 * 60 * 1000;
+        return settings.focus_duration * 60 * 1000;
       case 1:
-        return 5 * 60 * 1000;
+        return settings.short_break * 60 * 1000;
       case 3:
-        return 10 * 60 * 1000;
+        return settings.long_break * 60 * 1000;
       default:
-        return 25 * 60 * 1000;
+        return settings.focus_duration * 60 * 1000;
     }
   }
 

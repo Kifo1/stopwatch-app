@@ -23,7 +23,7 @@ export default function ProjectsPage() {
   return (
     <div>
       <h1 className="text-white text-5xl font-bold">Manage Projects</h1>
-      <p className="text-blue-200 pt-3">Organize and track your time...</p>
+      <p className="text-blue-200 pt-3">Organize and track your time.</p>
 
       {!userHasProjects ? (
         <FirstProjectTutorial />

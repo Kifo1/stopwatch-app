@@ -60,7 +60,7 @@ export function CreateProjectModal({
               id="name"
               placeholder="name"
               required
-              minLength={3}
+              minLength={1}
               maxLength={20}
               onChange={(e) => setProjectName(e.target.value)}
             ></TextInput>
@@ -79,7 +79,7 @@ export function CreateProjectModal({
               id="description"
               placeholder="description"
               required
-              minLength={10}
+              minLength={1}
               maxLength={70}
               onChange={(e) => setProjectDescription(e.target.value)}
             ></TextInput>

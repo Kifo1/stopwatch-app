@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
     <div>
       <h1 className="text-white text-5xl font-bold">Analyze Projects</h1>
       <p className="text-blue-200 pt-3">
-        See insides and statistics for your projects...
+        See insides and statistics for your projects.
       </p>
 
       {!userHasProjects ? (

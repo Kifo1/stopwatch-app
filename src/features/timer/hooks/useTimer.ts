@@ -1,17 +1,108 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import phaseChangeSound from "@assets/pomodoro-phase-change.mp3";
 import { Project } from "@/shared/components/layout/ProjectsPage";
+import { useSettings } from "@/features/settings/hooks/useSettings";
+
+type Subscriber = { tick: (n: number) => void; phase: (n: number) => void };
+let moduleListenersRegistered = false;
+const subscribers = new Set<Subscriber>();
+const sharedAudio = new Audio(phaseChangeSound);
+let lastSharedSoundTime = 0;
+
+async function ensureModuleListeners() {
+  if (moduleListenersRegistered) return;
+  moduleListenersRegistered = true;
+
+  await listen<number>("timer-tick", (event) => {
+    subscribers.forEach((s) => s.tick(event.payload));
+  });
+
+  await listen<number>("pomodoro-phase", (event) => {
+    subscribers.forEach((s) => s.phase(event.payload));
+  });
+
+  await listen("pomodoro-phase-sound", () => {
+    const now = Date.now();
+    if (now - lastSharedSoundTime > 1000) {
+      lastSharedSoundTime = now;
+      sharedAudio.currentTime = 0;
+      sharedAudio.play().catch((e) => console.error("Audio error:", e));
+    }
+  });
+}
 
 export function useTimer() {
+  const { settings } = useSettings();
+
   const [stopwtachMillis, setStopwatchMillis] = useState(0);
-  const [pomodoroMillis, setPomodoroMillis] = useState(25 * 60 * 1000);
+  const [pomodoroMillis, setPomodoroMillis] = useState(
+    (settings?.focus_duration || 25) * 60 * 1000,
+  );
   const [isRunning, setIsRunning] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [mode, setMode] = useState<"stopwatch" | "pomodoro">("stopwatch");
   const [pomodoroPhase, setPomodoroPhase] = useState(0);
-  const phaseChangeAudio = new Audio(phaseChangeSound);
+
+  const modeRef = useRef(mode);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  useEffect(() => {
+    const syncWithBackend = async () => {
+      try {
+        const [bIsRunning, bMode, sMillis, pMillis, phase, project] =
+          await Promise.all([
+            invoke<boolean>("is_timer_running"),
+            invoke<"stopwatch" | "pomodoro">("get_timer_mode"),
+            invoke<number>("get_stopwatch_millis"),
+            invoke<number>("get_pomodoro_millis"),
+            invoke<number>("get_pomodoro_phase"),
+            invoke<Project | null>("get_selected_project"),
+          ]);
+
+        setIsRunning(bIsRunning);
+        setMode(bMode);
+        setStopwatchMillis(sMillis);
+        setPomodoroMillis(pMillis);
+        setPomodoroPhase(phase);
+        setSelectedProject(project);
+      } catch (err) {
+        console.error("Backend Sync Fehler:", err);
+      }
+    };
+    syncWithBackend();
+  }, []);
+
+  useEffect(() => {
+    const localSubscriber: Subscriber = {
+      tick: (n: number) => {
+        if (modeRef.current === "stopwatch") {
+          setStopwatchMillis(n);
+        } else {
+          setPomodoroMillis(n);
+        }
+      },
+      phase: (n: number) => setPomodoroPhase(n),
+    };
+
+    subscribers.add(localSubscriber);
+    ensureModuleListeners();
+
+    return () => {
+      subscribers.delete(localSubscriber);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!settings) return;
+    if (!isRunning && mode === "pomodoro" && pomodoroPhase === 0) {
+      setPomodoroMillis(settings.focus_duration * 60 * 1000);
+    }
+  }, [settings?.focus_duration, isRunning, mode, pomodoroPhase]);
 
   const start = async () => {
     await invoke("start_timer");
@@ -25,63 +116,33 @@ export function useTimer() {
 
   const reset = async () => {
     await invoke("reset_timer");
-    mode === "stopwatch"
-      ? setStopwatchMillis(0)
-      : setPomodoroMillis(25 * 60 * 1000);
+    if (mode === "stopwatch") {
+      setStopwatchMillis(0);
+    } else {
+      const pMillis = await invoke<number>("get_pomodoro_millis");
+      setPomodoroMillis(pMillis);
+    }
   };
 
   const switchMode = async (newMode: "stopwatch" | "pomodoro") => {
     await stop();
     setMode(newMode);
     await invoke("switch_timer_mode", { timerMode: newMode });
+
+    const millis =
+      newMode === "pomodoro"
+        ? await invoke<number>("get_pomodoro_millis")
+        : await invoke<number>("get_stopwatch_millis");
+
+    newMode === "pomodoro"
+      ? setPomodoroMillis(millis)
+      : setStopwatchMillis(millis);
   };
 
   const switchSelectedProject = async (project: Project) => {
     setSelectedProject(project);
-    await invoke("set_selected_project", { project: project });
+    await invoke("set_selected_project", { project });
   };
-
-  useEffect(() => {
-    const unlistenTick = listen<number>("timer-tick", (event) =>
-      mode === "stopwatch"
-        ? setStopwatchMillis(event.payload)
-        : setPomodoroMillis(event.payload),
-    );
-    const unlistenPhase = listen<number>("pomodoro-phase", (event) => {
-      setPomodoroPhase(event.payload);
-    });
-    const unlistenPhaseSound = listen("pomodoro-phase-sound", () => {
-      phaseChangeAudio.play();
-    });
-
-    return () => {
-      unlistenTick.then((f) => f());
-      unlistenPhase.then((f) => f());
-      unlistenPhaseSound.then((f) => f());
-    };
-  }, [mode]);
-
-  useEffect(() => {
-    const syncWithBackend = async () => {
-      const stopwatchMillis: number = await invoke("get_stopwatch_millis");
-      const pomodoroMillis: number = await invoke("get_pomodoro_millis");
-      const backendIsRunning: boolean = await invoke("is_timer_running");
-      const mode: "stopwatch" | "pomodoro" = await invoke("get_timer_mode");
-      const pomodoroPhase: number = await invoke("get_pomodoro_phase");
-      const selectedProject: Project | null = await invoke(
-        "get_selected_project",
-      );
-
-      setMode(mode);
-      setIsRunning(backendIsRunning);
-      setStopwatchMillis(stopwatchMillis);
-      setPomodoroMillis(pomodoroMillis);
-      setPomodoroPhase(pomodoroPhase);
-      setSelectedProject(selectedProject);
-    };
-
-    syncWithBackend();
-  }, []);
 
   return {
     stopwtachMillis,
