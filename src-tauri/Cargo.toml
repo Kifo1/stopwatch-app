@@ -26,3 +26,4 @@ tokio = { version = "1.49.0", features = ["full"] }
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite", "uuid", "migrate", "chrono"] }
 chrono = { version = "0.4.43", features = ["serde"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
+open = "5.3.3"

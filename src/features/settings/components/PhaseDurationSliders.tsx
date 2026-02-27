@@ -110,7 +110,7 @@ export default function PhaseDurationSliders() {
           description="Length of single work session"
           Icon={Timer}
           settingsKey="focus_duration"
-          min={1}
+          min={5}
           max={60}
           step={5}
         />
