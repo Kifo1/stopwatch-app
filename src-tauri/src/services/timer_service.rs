@@ -261,3 +261,21 @@ pub async fn update_project_session(
 
     Ok(())
 }
+
+pub async fn sync_timer_with_settings(state: SharedTimerState, db: &DbState) -> Result<(), String> {
+    let settings = crate::services::settings_service::get_settings(db)
+        .await
+        .map_err(|_| "Failed to get settings")?;
+
+    {
+        let mut state_lock = state.lock().map_err(|_| "Mutex Error")?;
+
+        if let ActiveMode::Pomodoro = state_lock.active_mode {
+            state_lock.pomodoro.focus_minutes = settings.focus_duration;
+            state_lock.pomodoro.short_break_minutes = settings.short_break;
+            state_lock.pomodoro.long_break_minutes = settings.long_break;
+        }
+    }
+
+    Ok(())
+}

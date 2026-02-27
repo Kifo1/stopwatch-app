@@ -1,6 +1,8 @@
 use std::time::Instant;
 
-use crate::database::models::session::SessionType;
+use crate::{
+    database::models::session::SessionType, models::dbstate::DbState, services::settings_service,
+};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PomodoroPhase {
@@ -24,21 +26,27 @@ pub struct PomodoroState {
     pub elapsed_millis: u64,
     pub start_instant: Option<Instant>,
 
-    pub focus_minutes: u32,
-    pub short_break_minutes: u32,
-    pub long_break_minutes: u32,
+    pub focus_minutes: i64,
+    pub short_break_minutes: i64,
+    pub long_break_minutes: i64,
 
     pub phase: PomodoroPhase,
 }
 
 impl PomodoroState {
-    pub fn new() -> Self {
+    pub async fn new(db: &DbState) -> Self {
         Self {
             elapsed_millis: 0,
             start_instant: None,
-            focus_minutes: 25,
-            short_break_minutes: 5,
-            long_break_minutes: 10,
+            focus_minutes: settings_service::get_settings(db)
+                .await
+                .unwrap()
+                .focus_duration,
+            short_break_minutes: settings_service::get_settings(db)
+                .await
+                .unwrap()
+                .short_break,
+            long_break_minutes: settings_service::get_settings(db).await.unwrap().long_break,
             phase: PomodoroPhase::FocusOne,
         }
     }

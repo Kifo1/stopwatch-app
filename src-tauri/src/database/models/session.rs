@@ -19,7 +19,7 @@ pub enum TimerMode {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Session {
+pub struct _Session {
     pub id: String,
     pub project_id: String,
     pub start_time: DateTime<Utc>,

@@ -1,4 +1,4 @@
-use crate::database::models::project::Project;
+use crate::{database::models::project::Project, models::dbstate::DbState};
 
 use super::{pomodoro::PomodoroState, stopwatch::StopwatchState};
 use std::sync::{Arc, Mutex};
@@ -19,14 +19,14 @@ pub struct TimerState {
 }
 
 impl TimerState {
-    pub fn new() -> Self {
+    pub async fn new(db: &DbState) -> Self {
         Self {
             active_mode: ActiveMode::Stopwatch,
             is_running: false,
             selected_project: None,
             current_session_id: None,
             stopwatch: StopwatchState::new(),
-            pomodoro: PomodoroState::new(),
+            pomodoro: PomodoroState::new(db).await,
         }
     }
 }

@@ -16,8 +16,6 @@ use crate::models::timer::SharedTimerState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let timer_state = Arc::new(Mutex::new(TimerState::new()));
-
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -57,7 +55,9 @@ pub fn run() {
                 let _ =
                     crate::services::session_service::delete_incomplete_sessions(&db_state).await;
 
-                handle.manage(db_state);
+                handle.manage(db_state.clone());
+                let timer_state = Arc::new(Mutex::new(TimerState::new(&db_state.clone()).await));
+                handle.manage(timer_state);
             });
 
             Ok(())
@@ -87,7 +87,6 @@ pub fn run() {
                 }
             }
         })
-        .manage(timer_state)
         .invoke_handler(tauri::generate_handler![
             commands::timer_commands::start_timer,
             commands::timer_commands::stop_timer,
@@ -105,7 +104,9 @@ pub fn run() {
             commands::project_commands::delete_project,
             commands::analytics_commands::get_overall_project_time,
             commands::analytics_commands::get_todays_overall_time,
-            commands::analytics_commands::get_most_active_project_name
+            commands::analytics_commands::get_most_active_project_name,
+            commands::settings_commands::get_settings,
+            commands::settings_commands::update_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
