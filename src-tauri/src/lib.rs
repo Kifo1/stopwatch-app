@@ -2,6 +2,7 @@ mod commands;
 mod database;
 mod models;
 mod services;
+mod window;
 
 use models::dbstate::DbState;
 use models::timer::TimerState;
@@ -21,6 +22,10 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
 
+            // Window
+            window::window_menu::build_window_menu(app)?;
+
+            // Db
             let app_dir = handle
                 .path()
                 .app_data_dir()
