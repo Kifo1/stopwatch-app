@@ -21,7 +21,7 @@ export function useSettings() {
       return { previousSettings };
     },
 
-    onError: (err, newSettings, context) => {
+    onError: (_err, _newSettings, context) => {
       queryClient.setQueryData(["settings"], context?.previousSettings);
     },
   });
