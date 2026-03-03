@@ -99,10 +99,14 @@ export function useTimer() {
 
   useEffect(() => {
     if (!settings) return;
-    if (!isRunning && mode === "pomodoro" && pomodoroPhase === 0) {
+    if (
+      !isRunning &&
+      mode === "pomodoro" &&
+      (pomodoroPhase === 0 || pomodoroPhase === 2)
+    ) {
       setPomodoroMillis(settings.focus_duration * 60 * 1000);
     }
-  }, [settings?.focus_duration, isRunning, mode, pomodoroPhase]);
+  }, [settings?.focus_duration, mode, pomodoroPhase]);
 
   const start = async () => {
     await invoke("start_timer");
@@ -120,6 +124,7 @@ export function useTimer() {
       setStopwatchMillis(0);
     } else {
       const pMillis = await invoke<number>("get_pomodoro_millis");
+      console.log(pMillis);
       setPomodoroMillis(pMillis);
     }
   };

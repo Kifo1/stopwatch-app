@@ -270,10 +270,12 @@ pub async fn sync_timer_with_settings(state: SharedTimerState, db: &DbState) -> 
     {
         let mut state_lock = state.lock().map_err(|_| "Mutex Error")?;
 
-        if let ActiveMode::Pomodoro = state_lock.active_mode {
-            state_lock.pomodoro.focus_minutes = settings.focus_duration;
-            state_lock.pomodoro.short_break_minutes = settings.short_break;
-            state_lock.pomodoro.long_break_minutes = settings.long_break;
+        state_lock.pomodoro.focus_minutes = settings.focus_duration;
+        state_lock.pomodoro.short_break_minutes = settings.short_break;
+        state_lock.pomodoro.long_break_minutes = settings.long_break;
+
+        if !state_lock.is_running {
+            state_lock.pomodoro.elapsed_millis = 0;
         }
     }
 
