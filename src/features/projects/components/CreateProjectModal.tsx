@@ -61,7 +61,7 @@ export function CreateProjectModal({
               placeholder="name"
               required
               minLength={1}
-              maxLength={20}
+              maxLength={30}
               onChange={(e) => setProjectName(e.target.value)}
             ></TextInput>
           </p>
