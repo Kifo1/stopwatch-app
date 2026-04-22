@@ -34,13 +34,11 @@ export function TextInput({
   scale,
   className,
   ...props
-}: TextInputProps) {
+}: Readonly<TextInputProps>) {
   return (
-    <>
-      <input
-        className={cn(inputVariants({ variant, scale, className }))}
-        {...props}
-      />
-    </>
+    <input
+      className={cn(inputVariants({ variant, scale, className }))}
+      {...props}
+    />
   );
 }

@@ -15,7 +15,7 @@ export function TimerDisplay({
   mode,
   pomodoroPhase,
   isRunning,
-}: Props) {
+}: Readonly<Props>) {
   const { settings } = useSettings();
   const [transitionsEnabled, setTransitionsEnabled] = useState(false);
 

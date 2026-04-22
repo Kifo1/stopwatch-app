@@ -26,6 +26,29 @@ pub async fn create_project(
     Ok(uuid)
 }
 
+pub async fn update_project(
+    uuid: String,
+    name: String,
+    description: String,
+    color: String,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    let pool = &db.pool;
+
+    sqlx::query!(
+        "UPDATE projects SET name = ?, description = ?, color = ? WHERE id = ?",
+        name,
+        description,
+        color,
+        uuid
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, sqlx::Error> {
     let pool = &db.pool;
 

@@ -13,7 +13,7 @@ interface NavbarItemProps {
   to: string;
 }
 
-function NavbarItem({ name, Icon, to }: NavbarItemProps) {
+function NavbarItem({ name, Icon, to }: Readonly<NavbarItemProps>) {
   return (
     <NavLink
       to={to}

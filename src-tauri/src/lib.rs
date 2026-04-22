@@ -105,6 +105,7 @@ pub fn run() {
             commands::timer_commands::set_selected_project,
             commands::timer_commands::get_selected_project,
             commands::project_commands::create_project,
+            commands::project_commands::update_project,
             commands::project_commands::get_projects,
             commands::project_commands::delete_project,
             commands::analytics_commands::get_overall_project_time,

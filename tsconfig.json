@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     /* Path mapping */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@features/*": ["./src/features/*"],

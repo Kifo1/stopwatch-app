@@ -13,7 +13,10 @@ interface OverallInfoComponentProps {
   value: string;
 }
 
-function OverallInfoComponent({ title, value }: OverallInfoComponentProps) {
+function OverallInfoComponent({
+  title,
+  value,
+}: Readonly<OverallInfoComponentProps>) {
   return (
     <div className="flex flex-col">
       <span className="text-blue-200 font-semibold text-xs lg:text-sm uppercase">
@@ -28,10 +31,10 @@ interface ProjectOverviewProps {
   projects: Project[];
 }
 
-export function ProjectOverview({ projects }: ProjectOverviewProps) {
+export function ProjectOverview({ projects }: Readonly<ProjectOverviewProps>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: todaysTotalSeconds, isLoading: isLoading } = useQuery({
+  const { data: todaysTotalSeconds, isLoading } = useQuery({
     queryKey: ["todays_overall_time"],
     queryFn: () => invoke<number>("get_todays_overall_time"),
     refetchInterval: 10000,
@@ -44,45 +47,43 @@ export function ProjectOverview({ projects }: ProjectOverviewProps) {
   });
 
   return (
-    <>
-      <div className="flex flex-col gap-10 mt-15">
-        <div className="flex gap-10 p-5 rounded-2xl border border-slate-200/10 bg-slate-200/5">
-          <OverallInfoComponent
-            title="Total projects"
-            value={projects.length.toString()}
-          />
-          <div className="w-px h-auto bg-slate-200/10"></div>
-          <OverallInfoComponent
-            title="Time tracked today"
-            value={
-              isLoading
-                ? "Loading..."
-                : formatSecondsToString(todaysTotalSeconds || 0)
-            }
-          />
-          <div className="w-px h-auto bg-slate-200/10"></div>
-          <OverallInfoComponent
-            title="Most active"
-            value={nameIsLoading ? "Loading..." : mostActiveProjectName || ""}
-          />
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            className="font-medium rounded-md ml-auto"
-          >
-            <Plus className="hidden lg:inline" />
-            Add Project
-          </Button>
-        </div>
-        <div>
-          <ProjectTable projects={projects} />
-        </div>
-        {isModalOpen && (
-          <CreateProjectModal
-            isModalOpen={isModalOpen}
-            setIsModalOpen={setIsModalOpen}
-          />
-        )}
+    <div className="flex flex-col gap-10 mt-15">
+      <div className="flex gap-10 p-5 rounded-2xl border border-slate-200/10 bg-slate-200/5">
+        <OverallInfoComponent
+          title="Total projects"
+          value={projects.length.toString()}
+        />
+        <div className="w-px h-auto bg-slate-200/10"></div>
+        <OverallInfoComponent
+          title="Time tracked today"
+          value={
+            isLoading
+              ? "Loading..."
+              : formatSecondsToString(todaysTotalSeconds || 0)
+          }
+        />
+        <div className="w-px h-auto bg-slate-200/10"></div>
+        <OverallInfoComponent
+          title="Most active"
+          value={nameIsLoading ? "Loading..." : mostActiveProjectName || ""}
+        />
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="font-medium rounded-md ml-auto"
+        >
+          <Plus className="hidden lg:inline" />
+          Add Project
+        </Button>
       </div>
-    </>
+      <div>
+        <ProjectTable projects={projects} />
+      </div>
+      {isModalOpen && (
+        <CreateProjectModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+        />
+      )}
+    </div>
   );
 }

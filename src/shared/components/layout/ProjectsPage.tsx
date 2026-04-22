@@ -25,10 +25,10 @@ export default function ProjectsPage() {
       <h1 className="text-white text-5xl font-bold">Manage Projects</h1>
       <p className="text-blue-200 pt-3">Organize and track your time.</p>
 
-      {!userHasProjects ? (
-        <FirstProjectTutorial />
-      ) : (
+      {userHasProjects ? (
         <ProjectOverview projects={projects} />
+      ) : (
+        <FirstProjectTutorial />
       )}
     </div>
   );

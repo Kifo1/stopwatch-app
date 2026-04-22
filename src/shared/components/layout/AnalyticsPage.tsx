@@ -20,10 +20,10 @@ export default function AnalyticsPage() {
         See insides and statistics for your projects.
       </p>
 
-      {!userHasProjects ? (
-        <FirstProjectTutorial />
-      ) : (
+      {userHasProjects ? (
         <h2 className="text-white">Analytics coming soon...</h2>
+      ) : (
+        <FirstProjectTutorial />
       )}
     </div>
   );

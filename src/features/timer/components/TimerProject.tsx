@@ -12,7 +12,7 @@ interface TimerProjectDropdownProps {
 export function TimerProjectDropdown({
   currentProject,
   switchCurrentProject,
-}: TimerProjectDropdownProps) {
+}: Readonly<TimerProjectDropdownProps>) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: projects = [], isLoading } = useQuery({
@@ -25,7 +25,7 @@ export function TimerProjectDropdown({
       <div className="relative w-70">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center justify-between w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white hover:border-blue-500 transition-all shadow-lg"
+          className="flex items-center justify-between w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white hover:border-blue-500 transition-all shadow-lg hover:cursor-pointer"
         >
           <div className="flex items-center gap-3 overflow-hidden">
             {currentProject ? (
@@ -64,7 +64,7 @@ export function TimerProjectDropdown({
                     switchCurrentProject(project);
                     setIsOpen(false);
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-slate-700/50 text-white transition-colors border-b border-slate-700/50 last:border-0"
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-slate-700/50 text-white transition-colors border-b border-slate-700/50 last:border-0 hover:cursor-pointer"
                 >
                   <div
                     className="w-3 h-3 rounded-full"

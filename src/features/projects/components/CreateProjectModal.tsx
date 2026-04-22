@@ -13,7 +13,7 @@ interface CreateProjectModalProps {
 export function CreateProjectModal({
   isModalOpen,
   setIsModalOpen,
-}: CreateProjectModalProps) {
+}: Readonly<CreateProjectModalProps>) {
   const queryClient = useQueryClient();
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -27,7 +27,7 @@ export function CreateProjectModal({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     mutation.mutate({
       name: projectName,

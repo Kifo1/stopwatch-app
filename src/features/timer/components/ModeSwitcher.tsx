@@ -5,7 +5,7 @@ interface Props {
   onSwitch: any;
 }
 
-export function ModeSwitcher({ currentMode, onSwitch }: Props) {
+export function ModeSwitcher({ currentMode, onSwitch }: Readonly<Props>) {
   return (
     <div className="flex gap-2 justify-center bg-slate-800 rounded-full w-fit p-1">
       <Button

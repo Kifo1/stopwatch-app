@@ -39,7 +39,7 @@ export default function Button({
   scale,
   className,
   ...props
-}: ButtonComponentProps) {
+}: Readonly<ButtonComponentProps>) {
   return (
     <button
       className={cn(buttonVariants({ variant, scale, className }))}

@@ -10,10 +10,10 @@ interface ProjectTableEntryProps {
   project: Project;
 }
 
-function ProjectTableEntry({ project }: ProjectTableEntryProps) {
+function ProjectTableEntry({ project }: Readonly<ProjectTableEntryProps>) {
   const queryClient = useQueryClient();
 
-  const { data: totalSeconds, isLoading: isLoading } = useQuery({
+  const { data: totalSeconds, isLoading } = useQuery({
     queryKey: ["overall_project_time", project.id],
     queryFn: () =>
       invoke<number>("get_overall_project_time", { projectId: project.id }),
@@ -33,6 +33,11 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
     e.preventDefault();
     e.stopPropagation();
     deleteMutation.mutate(project.id);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
@@ -69,7 +74,10 @@ function ProjectTableEntry({ project }: ProjectTableEntryProps) {
       </td>
       <td className="px-2 pt-6 pb-6  py-2 md:px-6 md:py-5 whitespace-nowrap">
         <div className="flex items-center justify-end gap-5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Pencil className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-white"></Pencil>
+          <Pencil
+            className="hover:cursor-pointer rounded-lg text-blue-200 hover:text-white"
+            onClick={handleEdit}
+          ></Pencil>
           <Trash2
             className={`text-blue-200 hover:cursor-pointer hover:text-red-700 ${deleteMutation.isPending ? "opacity-50" : ""}`}
             onClick={handleDelete}
@@ -84,7 +92,7 @@ interface ProjectTableProps {
   projects: Project[];
 }
 
-export function ProjectTable({ projects }: ProjectTableProps) {
+export function ProjectTable({ projects }: Readonly<ProjectTableProps>) {
   const [page, _setPage] = useState(1);
   return (
     <div className="rounded-xl border border-slate-200/10 overflow-hidden bg-slate-200/5">

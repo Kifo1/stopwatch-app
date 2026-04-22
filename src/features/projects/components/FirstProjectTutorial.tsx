@@ -19,7 +19,7 @@ function TutorialStep({
   Icon,
   highlighted,
   setIsModalOpen,
-}: TutorialStepProps) {
+}: Readonly<TutorialStepProps>) {
   return (
     <div className="bg-slate-800 p-6 border rounded-2xl border-slate-700">
       <div className="flex">

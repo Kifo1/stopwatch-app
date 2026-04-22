@@ -16,6 +16,20 @@ pub async fn create_project(
 }
 
 #[tauri::command]
+pub async fn update_project(
+    uuid: String,
+    name: String,
+    description: String,
+    color: String,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    project_service::update_project(uuid.clone(), name, description, color, db)
+        .await
+        .unwrap_or_else(|_| panic!("Unable to update project with UUID: {}", uuid));
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn get_projects(db: State<'_, DbState>) -> Result<Vec<Project>, String> {
     let projects = project_service::get_projects(db)
         .await

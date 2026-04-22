@@ -7,7 +7,11 @@ interface Props {
   onReset: () => void;
 }
 
-export function TimerControls({ isRunning, onStartStop, onReset }: Props) {
+export function TimerControls({
+  isRunning,
+  onStartStop,
+  onReset,
+}: Readonly<Props>) {
   return (
     <div className="flex gap-4 w-full justify-center">
       <Button onClick={onStartStop}>

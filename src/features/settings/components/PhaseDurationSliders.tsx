@@ -20,7 +20,7 @@ function SliderComponent({
   min,
   max,
   step,
-}: SliderComponentProps) {
+}: Readonly<SliderComponentProps>) {
   const { settings, updateSettings } = useSettings();
 
   const currentValue = settings ? settings[settingsKey] : min;
