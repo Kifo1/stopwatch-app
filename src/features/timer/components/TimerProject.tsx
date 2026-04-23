@@ -50,7 +50,7 @@ export function TimerProjectDropdown({
 
         {isOpen && (
           <div className="absolute z-50 w-full mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
-            <div className="max-height-60 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto">
               {projects.length === 0 && !isLoading && (
                 <div className="px-4 py-3 text-sm text-slate-500 italic">
                   No projects found...
