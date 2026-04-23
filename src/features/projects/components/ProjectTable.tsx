@@ -93,7 +93,15 @@ interface ProjectTableProps {
 }
 
 export function ProjectTable({ projects }: Readonly<ProjectTableProps>) {
-  const [page, _setPage] = useState(1);
+  const [page, setPage] = useState(1);
+  const projectsPerPage = 5;
+
+  function maxPageNumber(projectAmount: number) {
+    console.log("Page: " + page);
+    console.log("MaxPages: " + Math.ceil(projectAmount / projectsPerPage));
+    return Math.ceil(projectAmount / projectsPerPage);
+  }
+
   return (
     <div className="rounded-xl border border-slate-200/10 overflow-hidden bg-slate-200/5">
       <div>
@@ -115,30 +123,39 @@ export function ProjectTable({ projects }: Readonly<ProjectTableProps>) {
             </tr>
           </thead>
           <tbody>
-            {projects.map((project) => (
-              <ProjectTableEntry key={project.id} project={project} />
-            ))}
+            {projects
+              .slice((page - 1) * projectsPerPage, page * projectsPerPage)
+              .map((project) => (
+                <ProjectTableEntry key={project.id} project={project} />
+              ))}
           </tbody>
         </table>
       </div>
       <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-200/5 border-slate-200/10 overflow-hidden">
         <div className="text-sm text-blue-200">
           <span>Showing </span>
-          <span className="font-medium text-white">{projects.length}</span>
+          <span className="font-medium text-white">
+            {1 + (page - 1) * projectsPerPage}-
+            {Math.min(page * projectsPerPage, projects.length)}
+          </span>
           <span> of </span>
           <span className="font-medium text-white">{projects.length}</span>
           <span> projects</span>
         </div>
         <div className="flex gap-2">
           <Button
-            variant={page === 1 ? "ghost" : "secondary"}
+            variant={"secondary"}
             className="border border-white/20 rounded-xl"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
           >
             Previous
           </Button>
           <Button
             variant={"secondary"}
             className="border border-white/20 rounded-xl"
+            disabled={page === maxPageNumber(projects.length)}
+            onClick={() => setPage(page + 1)}
           >
             Next
           </Button>
