@@ -1,11 +1,15 @@
 use tauri::State;
 
 use crate::{
+    database::models::project::Project,
     models::{
         analytics::{calendar_data::CalendarData, streak_data::StreakData},
         dbstate::DbState,
     },
-    services::analytics_service::{self, ActiveProjectFilterState},
+    services::{
+        analytics_service::{self, ActiveProjectFilterState},
+        project_service,
+    },
 };
 
 // Projects Page
@@ -48,6 +52,31 @@ pub async fn update_selected_projects(
         .map_err(|e| e.to_string())?;
     *ids = project_ids.clone();
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_selected_projects(
+    db: State<'_, DbState>,
+    filter_state: State<'_, ActiveProjectFilterState>,
+) -> Result<Vec<Project>, String> {
+    let ids: Vec<String> = {
+        let guard = filter_state
+            .selected_project_ids
+            .lock()
+            .map_err(|e| e.to_string())?;
+        guard.clone()
+    };
+
+    let all_projects = project_service::get_projects(db)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let projects: Vec<_> = all_projects
+        .into_iter()
+        .filter(|p| ids.contains(&p.id))
+        .collect();
+
+    Ok(projects)
 }
 
 // Analytics Page

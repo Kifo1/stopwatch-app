@@ -102,9 +102,22 @@ pub fn run() {
                 handle.manage(db_state.clone());
                 let internal_state =
                     Arc::new(std::sync::Mutex::new(TimerState::new(handle.clone()).await));
+
                 let timer_state = SharedTimerState::from(internal_state);
                 handle.manage(timer_state);
-                handle.manage(ActiveProjectFilterState::default());
+
+                let initial_selected_project_ids =
+                    sqlx::query!(r#"SELECT id as "id!" FROM projects WHERE is_deleted = 0"#)
+                        .fetch_all(&pool)
+                        .await
+                        .map(|records| records.into_iter().map(|r| r.id).collect::<Vec<String>>())
+                        .unwrap_or_else(|e| {
+                            log::error!("Failed to fetch initial project IDs: {}", e);
+                            Vec::new()
+                        });
+                handle.manage(ActiveProjectFilterState {
+                    selected_project_ids: std::sync::Mutex::new(initial_selected_project_ids),
+                });
 
                 handle.manage(ApiState::new(base_url));
 
@@ -222,6 +235,7 @@ pub fn run() {
             commands::analytics_commands::update_selected_projects,
             commands::analytics_commands::get_analytics_calendar,
             commands::analytics_commands::get_analytics_streak,
+            commands::analytics_commands::get_selected_projects,
             commands::settings_commands::get_settings,
             commands::settings_commands::update_settings,
             commands::discord_commands::set_discord_presence,
