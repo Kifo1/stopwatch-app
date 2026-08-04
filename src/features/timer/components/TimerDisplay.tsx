@@ -39,10 +39,16 @@ export function TimerDisplay({ millis, mode, pomodoroPhase, isRunning }: Readonl
     }
   }
 
+  const isOverAnHour = millis >= 60 * 60 * 1000;
+
   return (
     <div className="relative grid h-100 w-100 grid-rows-[2fr_1fr]">
       <div className="mt-auto mb-10 flex flex-col justify-center text-center">
-        <span className="font-mono text-6xl font-bold text-white tabular-nums">
+        <span
+          className={`font-mono font-bold text-white tabular-nums transition-all ${
+            isOverAnHour ? 'text-5xl' : 'text-6xl'
+          }`}
+        >
           {formatMillis(millis)}
         </span>
         <span className="text-lg font-semibold text-gray-500 uppercase">{mode}</span>
