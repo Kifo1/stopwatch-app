@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { invoke } from '@tauri-apps/api/core';
 import { Clock3, Pencil, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
+import { UpdateProjectModal } from './UpdateProjectModal';
 
 interface ProjectTableEntryProps {
   project: Project;
@@ -12,6 +13,7 @@ interface ProjectTableEntryProps {
 
 function ProjectTableEntry({ project }: Readonly<ProjectTableEntryProps>) {
   const queryClient = useQueryClient();
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   const { data: totalSeconds, isLoading } = useQuery({
     queryKey: ['overall_project_time', project.id],
@@ -37,6 +39,7 @@ function ProjectTableEntry({ project }: Readonly<ProjectTableEntryProps>) {
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsUpdateModalOpen(true);
   };
 
   return (
@@ -80,6 +83,13 @@ function ProjectTableEntry({ project }: Readonly<ProjectTableEntryProps>) {
           />
         </div>
       </td>
+      {isUpdateModalOpen && (
+        <UpdateProjectModal
+          project={project}
+          isModalOpen={isUpdateModalOpen}
+          setIsModalOpen={setIsUpdateModalOpen}
+        />
+      )}
     </tr>
   );
 }
