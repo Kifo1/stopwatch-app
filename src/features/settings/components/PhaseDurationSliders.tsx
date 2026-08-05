@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Slider from '@mui/material/Slider';
 import { Coffee, LucideIcon, Sofa, Timer } from 'lucide-react';
 import { useSettings } from '../hooks/useSettings';
+import { CustomSlider } from '@shared/components/Slider';
 
 interface SliderComponentProps {
   title: string;
@@ -32,14 +32,12 @@ function SliderComponent({
     }
   }, [settings, settingsKey]);
 
-  const handleLiveChange = (_: any, val: number | number[]) => {
-    if (typeof val === 'number') {
-      setLocalValue(val);
-    }
+  const handleLiveChange = (val: number) => {
+    setLocalValue(val);
   };
 
-  const handleFinalChange = (_: any, val: number | number[]) => {
-    if (settings && typeof val === 'number') {
+  const handleFinalChange = (val: number) => {
+    if (settings) {
       updateSettings({ ...settings, [settingsKey]: val });
     }
   };
@@ -63,50 +61,16 @@ function SliderComponent({
           <label className="text-left text-sm font-light text-blue-200">{description}</label>
         </div>
       </div>
-      <div className="px-2">
-        <Slider
-          value={localValue}
-          onChange={handleLiveChange}
-          onChangeCommitted={handleFinalChange}
-          step={step}
-          min={min}
-          max={max}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `${value}m`}
-          marks={generateMarks(min, max, step)}
-          sx={{
-            color: '#3b82f6',
-            '& .MuiSlider-thumb': {
-              transition: 'left 0.1s ease-out, bottom 0.1s ease-out',
-            },
-            '& .MuiSlider-track': {
-              transition: 'width 0.1s ease-out, height 0.1s ease-out',
-            },
-            '& .MuiSlider-markLabel': {
-              color: 'white',
-              fontSize: '0.85rem',
-              opacity: 0.8,
-            },
-            '& .MuiSlider-valueLabel': {
-              lineHeight: 1.2,
-              fontSize: 12,
-              background: 'unset',
-              padding: 0,
-              width: 32,
-              height: 32,
-              borderRadius: '50% 50% 50% 0',
-              backgroundColor: '#3b82f6',
-              transformOrigin: 'bottom left',
-              transform: 'translate(50%, -100%) rotate(-45deg) scale(0)',
-              '&::before': { display: 'none' },
-              '&.MuiSlider-valueLabelOpen': {
-                transform: 'translate(50%, -100%) rotate(-45deg) scale(1)',
-              },
-              '& > *': { transform: 'rotate(45deg)' },
-            },
-          }}
-        />
-      </div>
+      <CustomSlider
+        value={localValue}
+        onChange={handleLiveChange}
+        onChangeCommitted={handleFinalChange}
+        step={step}
+        min={min}
+        max={max}
+        marks={generateMarks(min, max, step)}
+        valueLabelFormat={(value) => `${value}m`}
+      />
     </div>
   );
 }
@@ -135,7 +99,7 @@ export default function PhaseDurationSliders() {
           description="Rest between work sessions"
           Icon={Coffee}
           settingsKey="short_break"
-          min={2}
+          min={5}
           max={15}
           step={1}
         />

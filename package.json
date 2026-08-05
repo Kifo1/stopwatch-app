@@ -12,9 +12,6 @@
     "format": "prettier --write \"**/*.{js,ts,jsx,tsx,cjs,cts,mjs,mts,json,vue,astro,css,scss,md}\""
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^9.2.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
